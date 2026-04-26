@@ -3,19 +3,16 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="8" :lg="6" :xl="5" style="margin-bottom: 10px">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>个人信息</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <span>个人信息</span>
+            </div>
+          </template>
           <div>
             <div style="text-align: center">
               <div class="el-upload">
                 <img :src="user.avatarName ? baseApi + '/avatar/' + user.avatarName : Avatar" title="点击上传头像" class="avatar" @click="toggleShow">
-                <myUpload
-                  v-model="show"
-                  :headers="headers"
-                  :url="updateAvatarApi"
-                  @crop-upload-success="cropUploadSuccess"
-                />
+                <input ref="fileInput" type="file" accept="image/*" style="display:none" @change="handleFileChange">
               </div>
             </div>
             <ul class="user-info">
@@ -56,7 +53,7 @@
                   </el-radio-group>
                 </el-form-item>
                 <el-form-item label="">
-                  <el-button :loading="saveLoading" size="mini" type="primary" @click="doSubmit">保存配置</el-button>
+                  <el-button :loading="saveLoading" size="small" type="primary" @click="doSubmit">保存配置</el-button>
                 </el-form-item>
               </el-form>
             </el-tab-pane>
@@ -68,19 +65,20 @@
                 <el-table-column :show-overflow-tooltip="true" prop="address" label="IP来源" />
                 <el-table-column prop="browser" label="浏览器" />
                 <el-table-column prop="time" label="请求耗时" align="center">
-                  <template slot-scope="scope">
+                  <template #default="scope">
                     <el-tag v-if="scope.row.time <= 300">{{ scope.row.time }}ms</el-tag>
                     <el-tag v-else-if="scope.row.time <= 1000" type="warning">{{ scope.row.time }}ms</el-tag>
                     <el-tag v-else type="danger">{{ scope.row.time }}ms</el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column
-                  align="right"
-                >
-                  <template slot="header">
-                    <div style="display:inline-block;float: right;cursor: pointer" @click="init">创建日期<i class="el-icon-refresh" style="margin-left: 40px" /></div>
+                <el-table-column align="right">
+                  <template #header>
+                    <div style="display:inline-block;float: right;cursor: pointer" @click="init">
+                      创建日期
+                      <el-icon style="margin-left: 40px"><refresh /></el-icon>
+                    </div>
                   </template>
-                  <template slot-scope="scope">
+                  <template #default="scope">
                     <span>{{ scope.row.createTime }}</span>
                   </template>
                 </el-table-column>
@@ -99,25 +97,53 @@
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog v-model="cropVisible" title="裁剪头像" width="400px">
+      <div style="height: 300px;">
+        <vue-cropper
+          ref="cropper"
+          :img="cropOption.img"
+          :output-size="cropOption.outputSize"
+          :output-type="cropOption.outputType"
+          :info="cropOption.info"
+          :can-scale="cropOption.canScale"
+          :auto-crop="cropOption.autoCrop"
+          :auto-crop-width="cropOption.autoCropWidth"
+          :auto-crop-height="cropOption.autoCropHeight"
+          :fixed-box="cropOption.fixedBox"
+          :fixed="cropOption.fixed"
+          :fixed-number="cropOption.fixedNumber"
+        />
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cropVisible = false">取消</el-button>
+          <el-button type="primary" @click="uploadAvatar">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
     <updateEmail ref="email" :email="user.email" />
     <updatePass ref="pass" />
   </div>
 </template>
 
 <script>
-import myUpload from 'vue-image-crop-upload'
-import { mapGetters } from 'vuex'
-import updatePass from './center/updatePass'
-import updateEmail from './center/updateEmail'
+import axios from 'axios'
+import { mapState } from 'pinia'
+import { Refresh } from '@element-plus/icons-vue'
+import { useUserStore, useApiStore } from '@/store'
+import updatePass from './center/updatePass.vue'
+import updateEmail from './center/updateEmail.vue'
 import { getToken } from '@/utils/auth'
-import store from '@/store'
 import { isvalidPhone } from '@/utils/validate'
 import crud from '@/mixins/crud'
 import { editUser } from '@/api/system/user'
 import Avatar from '@/assets/images/avatar.png'
+import { VueCropper } from 'vue-cropper'
+import 'vue-cropper/dist/index.css'
+
 export default {
   name: 'Center',
-  components: { updatePass, updateEmail, myUpload },
+  components: { updatePass, updateEmail, Refresh, VueCropper },
   mixins: [crud],
   data() {
     // 自定义验证
@@ -131,14 +157,24 @@ export default {
       }
     }
     return {
-      show: false,
       Avatar: Avatar,
       activeName: 'first',
       saveLoading: false,
-      headers: {
-        'Authorization': getToken()
-      },
       form: {},
+      cropVisible: false,
+      cropOption: {
+        img: '',
+        outputSize: 1,
+        outputType: 'jpeg',
+        info: true,
+        canScale: true,
+        autoCrop: true,
+        autoCropWidth: 200,
+        autoCropHeight: 200,
+        fixedBox: true,
+        fixed: true,
+        fixedNumber: [1, 1]
+      },
       rules: {
         nickName: [
           { required: true, message: '请输入用户昵称', trigger: 'blur' },
@@ -151,22 +187,31 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'user',
-      'updateAvatarApi',
-      'baseApi'
-    ])
+    ...mapState(useUserStore, ['user']),
+    ...mapState(useApiStore, ['updateAvatarApi', 'baseApi'])
   },
   created() {
     this.form = { id: this.user.id, nickName: this.user.nickName, gender: this.user.gender, phone: this.user.phone }
-    store.dispatch('GetInfo').then(() => {})
+    useUserStore().getInfo()
   },
   methods: {
     toggleShow() {
-      this.show = !this.show
+      this.$refs.fileInput.click()
+    },
+    handleFileChange(e) {
+      const file = e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        this.cropOption.img = e.target.result
+        this.cropVisible = true
+      }
+      reader.readAsDataURL(file)
+      // 重置 input，允许重复选择同一文件
+      e.target.value = ''
     },
     handleClick(tab, event) {
-      if (tab.name === 'second') {
+      if (tab.props.name === 'second') {
         this.init()
       }
     },
@@ -174,8 +219,23 @@ export default {
       this.url = 'api/logs/user'
       return true
     },
-    cropUploadSuccess(jsonData, field) {
-      store.dispatch('GetInfo').then(() => {})
+    uploadAvatar() {
+      this.$refs.cropper.getCropBlob(blob => {
+        const data = new FormData()
+        data.append('avatar', blob, 'avatar.jpg')
+        const config = {
+          headers: { 'Authorization': getToken() }
+        }
+        axios.post(this.updateAvatarApi, data, config).then(() => {
+          this.cropVisible = false
+          this.cropUploadSuccess()
+        }).catch(err => {
+          console.error(err)
+        })
+      })
+    },
+    cropUploadSuccess() {
+      useUserStore().getInfo()
     },
     doSubmit() {
       if (this.$refs['form']) {
@@ -184,7 +244,7 @@ export default {
             this.saveLoading = true
             editUser(this.form).then(() => {
               this.editSuccessNotify()
-              store.dispatch('GetInfo').then(() => {})
+              useUserStore().getInfo()
               this.saveLoading = false
             }).catch(() => {
               this.saveLoading = false

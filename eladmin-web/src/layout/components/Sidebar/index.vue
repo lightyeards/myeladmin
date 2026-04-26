@@ -19,18 +19,17 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import Logo from './Logo'
-import SidebarItem from './SidebarItem'
+import { mapState } from 'pinia'
+import { useAppStore, usePermissionStore, useSettingsStore } from '@/store'
+import Logo from './Logo.vue'
+import SidebarItem from './SidebarItem.vue'
 import variables from '@/assets/styles/variables.module.js'
 
 export default {
   components: { SidebarItem, Logo },
   computed: {
-    ...mapGetters([
-      'sidebarRouters',
-      'sidebar'
-    ]),
+    ...mapState(usePermissionStore, ['sidebarRouters']),
+    ...mapState(useAppStore, ['sidebar']),
     activeMenu() {
       const route = this.$route
       const { meta, path } = route
@@ -41,7 +40,7 @@ export default {
       return path
     },
     showLogo() {
-      return this.$store.state.settings.sidebarLogo
+      return useSettingsStore().sidebarLogo
     },
     variables() {
       return variables

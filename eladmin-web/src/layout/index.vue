@@ -18,11 +18,12 @@
 </template>
 
 <script>
-import RightPanel from '@/components/RightPanel'
+import { mapState } from 'pinia'
+import { useAppStore, useSettingsStore } from '@/store'
+import RightPanel from '@/components/RightPanel/index.vue'
 import { AppMain, Navbar, Settings, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
-import { mapState } from 'vuex'
-import Theme from '@/components/ThemePicker'
+import Theme from '@/components/ThemePicker/index.vue'
 import Cookies from 'js-cookie'
 export default {
   name: 'Layout',
@@ -37,12 +38,11 @@ export default {
   },
   mixins: [ResizeMixin],
   computed: {
-    ...mapState({
-      sidebar: state => state.app.sidebar,
-      device: state => state.app.device,
-      showSettings: state => state.settings.showSettings,
-      needTagsView: state => state.settings.tagsView,
-      fixedHeader: state => state.settings.fixedHeader
+    ...mapState(useAppStore, ['sidebar', 'device']),
+    ...mapState(useSettingsStore, {
+      showSettings: 'showSettings',
+      fixedHeader: 'fixedHeader',
+      needTagsView: 'tagsView'
     }),
     classObj() {
       return {
@@ -56,7 +56,7 @@ export default {
   mounted() {
     if (Cookies.get('theme')) {
       this.$refs.theme.theme = Cookies.get('theme')
-      this.$store.dispatch('settings/changeSetting', {
+      useSettingsStore().changeSetting({
         key: 'theme',
         value: Cookies.get('theme')
       })
@@ -64,7 +64,7 @@ export default {
   },
   methods: {
     handleClickOutside() {
-      this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
+      useAppStore().closeSideBar({ withoutAnimation: false })
     }
   }
 }

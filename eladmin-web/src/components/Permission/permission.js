@@ -1,15 +1,15 @@
-import store from '@/store'
+import { useUserStore } from '@/store'
 
+// Vue 3 directive — `inserted` → `mounted`
 export default {
-  inserted(el, binding) {
+  mounted(el, binding) {
     const { value } = binding
-    const roles = store.getters && store.getters.roles
+    const userStore = useUserStore()
+    const roles = userStore.roles
     if (value && value instanceof Array) {
       if (value.length > 0) {
         const permissionRoles = value
-        const hasPermission = roles.some(role => {
-          return permissionRoles.includes(role)
-        })
+        const hasPermission = roles.some(role => permissionRoles.includes(role))
         if (!hasPermission) {
           el.parentNode && el.parentNode.removeChild(el)
         }

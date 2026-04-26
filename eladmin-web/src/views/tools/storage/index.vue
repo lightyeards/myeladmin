@@ -4,10 +4,10 @@
       <Local ref="local" />
     </el-tab-pane>
     <el-tab-pane label="对象存储" name="second">
-      <template slot="label">
+      <template #label>
         对象存储
         <el-tooltip content="兼容 Amazon S3 协议的对象存储，暂不提供测试，请自行运行测试" placement="top">
-          <i class="el-icon-question" style="margin-left: 8px; cursor: pointer;" />
+          <el-icon style="margin-left: 8px; cursor: pointer;"><question-filled /></el-icon>
         </el-tooltip>
       </template>
       <S3 ref="s3" />
@@ -16,11 +16,12 @@
 </template>
 
 <script>
-import S3 from './s3/index'
-import Local from './local/index'
+import { QuestionFilled } from '@element-plus/icons-vue'
+import S3 from './s3/index.vue'
+import Local from './local/index.vue'
 export default {
   name: 'Storage',
-  components: { S3, Local },
+  components: { S3, Local, QuestionFilled },
   data() {
     return {
       activeName: 'first'
@@ -40,7 +41,7 @@ export default {
 
 <style scoped>
 /* 自定义问号图标样式 */
-.el-icon-question {
+.question-icon {
   font-size: 16px;
   color: #409EFF;
 }

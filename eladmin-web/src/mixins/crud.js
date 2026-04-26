@@ -1,3 +1,4 @@
+import { ElNotification, ElMessageBox } from 'element-plus'
 import {
   initData,
   download
@@ -116,35 +117,35 @@ export default {
      * 通用的提示封装
      */
     submitSuccessNotify() {
-      this.$notify({
+      ElNotification({
         title: '提交成功',
         type: 'success',
         duration: 2500
       })
     },
     addSuccessNotify() {
-      this.$notify({
+      ElNotification({
         title: '新增成功',
         type: 'success',
         duration: 2500
       })
     },
     editSuccessNotify() {
-      this.$notify({
+      ElNotification({
         title: '编辑成功',
         type: 'success',
         duration: 2500
       })
     },
     delSuccessNotify() {
-      this.$notify({
+      ElNotification({
         title: '删除成功',
         type: 'success',
         duration: 2500
       })
     },
     notify(title, type) {
-      this.$notify({
+      ElNotification({
         title: title,
         type: type,
         duration: 2500
@@ -181,7 +182,7 @@ export default {
      * 多选删除提示
      */
     beforeDelAllMethod() {
-      this.$confirm('你确定删除选中的数据吗？', '提示', {
+      ElMessageBox.confirm('你确定删除选中的数据吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -203,7 +204,7 @@ export default {
         this.delAllLoading = false
         this.dleChangePage(ids.length)
         this.init()
-        this.$notify({
+        ElNotification({
           title: '删除成功',
           type: 'success',
           duration: 2500

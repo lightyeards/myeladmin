@@ -1,9 +1,9 @@
 <template>
   <el-dialog
+    v-model="cuVisible"
     append-to-body
     :close-on-click-modal="false"
     :before-close="crud.cancelCU"
-    :visible="crud.status.cu > 0"
     :title="crud.status.title"
     width="500px"
   >
@@ -40,34 +40,34 @@
         label="状态"
         prop="enabled"
       >
-        <el-radio
-          v-for="item in jobStatus"
-          :key="item.id"
-          v-model="form.enabled"
-          :label="item.value === 'true'"
-        >
-          {{ item.label }}
-        </el-radio>
+        <el-radio-group v-model="form.enabled">
+          <el-radio
+            v-for="item in jobStatus"
+            :key="item.id"
+            :label="item.value === 'true'"
+          >
+            {{ item.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
     </el-form>
-    <div
-      slot="footer"
-      class="dialog-footer"
-    >
-      <el-button
-        type="text"
-        @click="crud.cancelCU"
-      >
-        取消
-      </el-button>
-      <el-button
-        :loading="crud.status.cu === 2"
-        type="primary"
-        @click="crud.submitCU"
-      >
-        确认
-      </el-button>
-    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button
+          text
+          @click="crud.cancelCU"
+        >
+          取消
+        </el-button>
+        <el-button
+          :loading="crud.status.cu === 2"
+          type="primary"
+          @click="crud.submitCU"
+        >
+          确认
+        </el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 
@@ -99,12 +99,18 @@ export default {
         ]
       }
     }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
+    }
   }
 }
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .el-input-number .el-input__inner {
+ :deep(.el-input-number .el-input__inner) {
     text-align: left;
   }
 </style>

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 
 import 'echarts/theme/macarons' // echarts theme
 import { debounce } from '@/utils'
@@ -37,7 +37,7 @@ export default {
     }, 100)
     window.addEventListener('resize', this.__resizeHandler)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (!this.chart) {
       return
     }
@@ -92,18 +92,16 @@ export default {
             }
           },
           itemStyle: {
-            normal: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(120, 36, 50, 0.5)',
-              shadowOffsetY: 5,
-              color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                offset: 0,
-                color: 'rgb(251, 118, 123)'
-              }, {
-                offset: 1,
-                color: 'rgb(204, 46, 72)'
-              }])
-            }
+            shadowBlur: 10,
+            shadowColor: 'rgba(120, 36, 50, 0.5)',
+            shadowOffsetY: 5,
+            color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+              offset: 0,
+              color: 'rgb(251, 118, 123)'
+            }, {
+              offset: 1,
+              color: 'rgb(204, 46, 72)'
+            }])
           }
         }, {
           name: '2015',
@@ -122,18 +120,16 @@ export default {
             }
           },
           itemStyle: {
-            normal: {
-              shadowBlur: 10,
-              shadowColor: 'rgba(25, 100, 150, 0.5)',
-              shadowOffsetY: 5,
-              color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                offset: 0,
-                color: 'rgb(129, 227, 238)'
-              }, {
-                offset: 1,
-                color: 'rgb(25, 183, 207)'
-              }])
-            }
+            shadowBlur: 10,
+            shadowColor: 'rgba(25, 100, 150, 0.5)',
+            shadowOffsetY: 5,
+            color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+              offset: 0,
+              color: 'rgb(129, 227, 238)'
+            }, {
+              offset: 1,
+              color: 'rgb(25, 183, 207)'
+            }])
           }
         }]
       })

@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
-import vue from '@vitejs/plugin-vue2'
-import vueJsx from '@vitejs/plugin-vue2-jsx'
+import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import path from 'node:path'
 
@@ -67,7 +67,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            'element-ui': ['element-ui'],
+            'element-plus': ['element-plus'],
             echarts: ['echarts', 'vue-echarts']
           }
         }

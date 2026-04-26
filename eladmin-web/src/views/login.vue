@@ -6,17 +6,23 @@
       </h3>
       <el-form-item prop="username">
         <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号">
-          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+          <template #prefix>
+            <svg-icon icon-class="user" class="el-input__icon input-icon" />
+          </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter.native="handleLogin">
-          <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
+        <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" @keyup.enter="handleLogin">
+          <template #prefix>
+            <svg-icon icon-class="password" class="el-input__icon input-icon" />
+          </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="code">
-        <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter.native="handleLogin">
-          <svg-icon slot="prefix" icon-class="validCode" class="el-input__icon input-icon" />
+        <el-input v-model="loginForm.code" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter="handleLogin">
+          <template #prefix>
+            <svg-icon icon-class="validCode" class="el-input__icon input-icon" />
+          </template>
         </el-input>
         <div class="login-code">
           <img :src="codeUrl" @click="getCode">
@@ -26,28 +32,31 @@
         记住我
       </el-checkbox>
       <el-form-item style="width:100%;">
-        <el-button :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
+        <el-button :loading="loading" size="default" type="primary" style="width:100%;" @click.prevent="handleLogin">
           <span v-if="!loading">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
       </el-form-item>
     </el-form>
     <!--  底部  -->
-    <div v-if="$store.state.settings.showFooter" id="el-login-footer">
-      <span v-html="$store.state.settings.footerTxt" />
-      <span v-if="$store.state.settings.caseNumber"> ⋅ </span>
-      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ $store.state.settings.caseNumber }}</a>
+    <div v-if="settingsStore.showFooter" id="el-login-footer">
+      <span v-html="settingsStore.footerTxt" />
+      <span v-if="settingsStore.caseNumber"> ⋅ </span>
+      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ settingsStore.caseNumber }}</a>
     </div>
   </div>
 </template>
 
 <script>
+import { ElNotification } from 'element-plus'
+import { useUserStore, useSettingsStore } from '@/store'
 import { encrypt } from '@/utils/rsaEncrypt'
 import Config from '@/settings'
 import { getCodeImg } from '@/api/login'
 import Cookies from 'js-cookie'
 import qs from 'qs'
 import Background from '@/assets/images/background.jpeg'
+
 export default {
   name: 'Login',
   data() {
@@ -69,6 +78,11 @@ export default {
       },
       loading: false,
       redirect: undefined
+    }
+  },
+  computed: {
+    settingsStore() {
+      return useSettingsStore()
     }
   },
   watch: {
@@ -138,7 +152,7 @@ export default {
             Cookies.remove('password')
             Cookies.remove('rememberMe')
           }
-          this.$store.dispatch('Login', user).then(() => {
+          useUserStore().login(user).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
           }).catch(() => {
@@ -154,7 +168,7 @@ export default {
     point() {
       const point = Cookies.get('point') !== undefined
       if (point) {
-        this.$notify({
+        ElNotification({
           title: '提示',
           message: '当前登录状态已过期，请重新登录！',
           type: 'warning',

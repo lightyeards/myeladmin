@@ -1,7 +1,7 @@
 import axios from 'axios'
 import router from '@/router/routers'
-import { Notification } from 'element-ui'
-import store from '../store'
+import { ElNotification } from 'element-plus'
+import { useUserStore } from '@/store'
 import { getToken } from '@/utils/auth'
 import Config from '@/settings'
 import Cookies from 'js-cookie'
@@ -38,7 +38,7 @@ service.interceptors.response.use(
       reader.readAsText(error.response.data, 'utf-8')
       reader.onload = function(e) {
         const errorMsg = JSON.parse(reader.result).message
-        Notification.error({
+        ElNotification.error({
           title: errorMsg,
           duration: 5000
         })
@@ -47,9 +47,9 @@ service.interceptors.response.use(
       let code = 0
       try {
         code = error.response.data.status
-      } catch (e) {
+      } catch {
         if (error.toString().indexOf('Error: timeout') !== -1) {
-          Notification.error({
+          ElNotification.error({
             title: '网络请求超时',
             duration: 5000
           })
@@ -59,7 +59,7 @@ service.interceptors.response.use(
       console.log(code)
       if (code) {
         if (code === 401) {
-          store.dispatch('LogOut').then(() => {
+          useUserStore().logOut().then(() => {
             // 用户登录界面提示
             Cookies.set('point', 401)
             location.reload()
@@ -69,14 +69,14 @@ service.interceptors.response.use(
         } else {
           const errorMsg = error.response.data.message
           if (errorMsg !== undefined) {
-            Notification.error({
+            ElNotification.error({
               title: errorMsg,
               duration: 5000
             })
           }
         }
       } else {
-        Notification.error({
+        ElNotification.error({
           title: '接口请求失败',
           duration: 5000
         })

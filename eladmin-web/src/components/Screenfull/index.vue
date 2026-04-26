@@ -6,6 +6,7 @@
 
 <script>
 import screenfull from 'screenfull'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'Screenfull',
@@ -17,13 +18,13 @@ export default {
   mounted() {
     this.init()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroy()
   },
   methods: {
     click() {
       if (!screenfull.enabled) {
-        this.$message({
+        ElMessage({
           message: 'you browser can not work',
           type: 'warning'
         })

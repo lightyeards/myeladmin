@@ -2,15 +2,14 @@
   <elFrame :src="sqlApi" />
 </template>
 <script>
-import { mapGetters } from 'vuex'
-import elFrame from '@/components/Iframe/index'
+import { mapState } from 'pinia'
+import { useApiStore } from '@/store'
+import elFrame from '@/components/Iframe/index.vue'
 export default {
   name: 'Sql',
   components: { elFrame },
   computed: {
-    ...mapGetters([
-      'sqlApi'
-    ])
+    ...mapState(useApiStore, ['sqlApi'])
   }
 }
 </script>

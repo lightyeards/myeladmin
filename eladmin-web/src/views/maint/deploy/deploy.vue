@@ -1,5 +1,5 @@
 <template>
-  <el-dialog append-to-body :close-on-click-modal="false" :visible.sync="dialog" title="应用部署" width="400px">
+  <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="应用部署" width="400px">
     <el-form ref="form" :model="form" :rules="rules" size="small">
       <el-upload
         :action="deployUploadApi"
@@ -10,26 +10,34 @@
         class="upload-demo"
         drag
       >
-        <i class="el-icon-upload" />
+        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
         <div class="el-upload__text">
           将文件拖到此处，或
           <em>点击上传</em>
         </div>
-        <div slot="tip" class="el-upload__tip">多个应用上传文件名称为all.zip,数据库更新脚本扩展名为.sql,上传成功后系统自动部署系统。</div>
+        <template #tip>
+          <div class="el-upload__tip">多个应用上传文件名称为all.zip,数据库更新脚本扩展名为.sql,上传成功后系统自动部署系统。</div>
+        </template>
       </el-upload>
     </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="cancel">关闭</el-button>
-    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="cancel">关闭</el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 
 <script>
+import { mapState } from 'pinia'
+import { ElNotification } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
+import { useApiStore } from '@/store'
 import { add, edit, getApps, getServers } from '@/api/maint/deploy'
-import { mapGetters } from 'vuex'
 import { getToken } from '@/utils/auth'
 
 export default {
+  components: { UploadFilled },
   props: {},
   data() {
     return {
@@ -51,7 +59,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['deployUploadApi'])
+    ...mapState(useApiStore, ['deployUploadApi'])
   },
   created() {
     this.initWebSocket()
@@ -85,7 +93,7 @@ export default {
       add(this.form)
         .then(res => {
           this.resetForm()
-          this.$notify({
+          ElNotification({
             title: '添加成功',
             type: 'success',
             duration: 2500
@@ -103,7 +111,7 @@ export default {
       edit(this.form)
         .then(res => {
           this.resetForm()
-          this.$notify({
+          ElNotification({
             title: '修改成功',
             type: 'success',
             duration: 2500
@@ -140,7 +148,7 @@ export default {
     // 监听上传失败
     handleError(e, file, fileList) {
       const msg = JSON.parse(e.message)
-      this.$notify({
+      ElNotification({
         title: msg.message,
         type: 'error',
         duration: 2500
@@ -153,7 +161,7 @@ export default {
       this.websock.onmessage = this.webSocketOnMessage
     },
     webSocketOnError(e) {
-      this.$notify({
+      ElNotification({
         title: 'WebSocket连接发生错误',
         type: 'error',
         duration: 0
@@ -162,7 +170,7 @@ export default {
     webSocketOnMessage(e) {
       const data = JSON.parse(e.data)
       if (data.msgType === 'INFO') {
-        this.$notify({
+        ElNotification({
           title: '',
           message: data.msg,
           type: 'success',
@@ -170,7 +178,7 @@ export default {
           duration: 5500
         })
       } else if (data.msgType === 'ERROR') {
-        this.$notify({
+        ElNotification({
           title: '',
           message: data.msg,
           dangerouslyUseHTMLString: true,

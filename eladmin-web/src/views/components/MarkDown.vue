@@ -2,33 +2,32 @@
   <div class="app-container">
     <p class="warn-content">
       Markdown 基于
-      <el-link type="primary" href="https://github.com/hinesboy/mavonEditor" target="_blank">MavonEditor</el-link>
+      <el-link type="primary" href="https://github.com/imzbf/md-editor-v3" target="_blank">md-editor-v3</el-link>
     </p>
-    <mavon-editor ref="md" :style="'height:' + height" @imgAdd="imgAdd" />
+    <MdEditor v-model="text" :style="{ height: height }" @on-upload-img="onUploadImg" />
   </div>
 </template>
 
 <script>
+import { mapState } from 'pinia'
+import { useApiStore } from '@/store'
 import { upload } from '@/utils/upload'
-import { mapGetters } from 'vuex'
-import { mavonEditor } from 'mavon-editor'
-import 'mavon-editor/dist/css/index.css'
+import { MdEditor } from 'md-editor-v3'
+import 'md-editor-v3/lib/style.css'
 
 export default {
   name: 'Markdown',
   components: {
-    mavonEditor
+    MdEditor
   },
   data() {
     return {
+      text: '更多帮助请查看官方文档',
       height: document.documentElement.clientHeight - 200 + 'px'
     }
   },
   computed: {
-    ...mapGetters([
-      'imagesUploadApi',
-      'baseApi'
-    ])
+    ...mapState(useApiStore, ['imagesUploadApi', 'baseApi'])
   },
   mounted() {
     const that = this
@@ -37,19 +36,22 @@ export default {
     }
   },
   methods: {
-    imgAdd(pos, $file) {
-      upload(this.imagesUploadApi, $file).then(res => {
-        const data = res.data
-        const url = this.baseApi + '/file/' + data.type + '/' + data.realName
-        this.$refs.md.$img2Url(pos, url)
+    async onUploadImg(files, callback) {
+      const res = await Promise.all(
+        files.map(file => upload(this.imagesUploadApi, file))
+      )
+      const urls = res.map(item => {
+        const data = item.data
+        return this.baseApi + '/file/' + data.type + '/' + data.realName
       })
+      callback(urls)
     }
   }
 }
 </script>
 
 <style scoped>
-  .v-note-wrapper.shadow {
+  .md-editor {
     z-index: 5;
   }
 </style>

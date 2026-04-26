@@ -1,6 +1,6 @@
 <template>
   <div style="display: inline-block;">
-    <el-dialog :visible.sync="dialog" :close-on-click-modal="false" :before-close="cancel" :title="title" append-to-body width="475px" @close="cancel">
+    <el-dialog v-model="dialog" :close-on-click-modal="false" :before-close="cancel" :title="title" append-to-body width="475px" @close="cancel">
       <el-form ref="form" :model="form" :rules="rules" size="small" label-width="88px">
         <el-form-item label="新邮箱" prop="email">
           <el-input v-model="form.email" auto-complete="on" style="width: 200px;" />
@@ -13,16 +13,19 @@
           <el-input v-model="form.pass" type="password" style="width: 320px;" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="text" @click="cancel">取消</el-button>
-        <el-button :loading="loading" type="primary" @click="doSubmit">确认</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button text @click="cancel">取消</el-button>
+          <el-button :loading="loading" type="primary" @click="doSubmit">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import store from '@/store'
+import { ElMessage, ElNotification } from 'element-plus'
+import { useUserStore } from '@/store'
 import { validEmail } from '@/utils/validate'
 import { updateEmail } from '@/api/system/user'
 import { resetEmail } from '@/api/system/code'
@@ -72,7 +75,7 @@ export default {
         this.buttonName = '验证码发送中'
         const _this = this
         resetEmail(this.form.email).then(res => {
-          this.$message({
+          ElMessage({
             showClose: true,
             message: '发送成功，验证码有效期5分钟',
             type: 'success'
@@ -104,12 +107,12 @@ export default {
           updateEmail(this.form).then(res => {
             this.loading = false
             this.resetForm()
-            this.$notify({
+            ElNotification({
               title: '邮箱修改成功',
               type: 'success',
               duration: 1500
             })
-            store.dispatch('GetInfo').then(() => {})
+            useUserStore().getInfo()
           }).catch(err => {
             this.loading = false
             console.log(err.response.data.message)

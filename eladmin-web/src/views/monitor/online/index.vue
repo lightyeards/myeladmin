@@ -2,22 +2,23 @@
   <div class="app-container">
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
-        <el-input v-model="query.username" clearable size="small" placeholder="输入用户名称查询" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.username" clearable size="small" placeholder="输入用户名称查询" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <rrOperation />
       </div>
       <crudOperation>
-        <el-button
-          slot="left"
-          class="filter-item"
-          type="danger"
-          icon="el-icon-delete"
-          size="mini"
-          :loading="delLoading"
-          :disabled="crud.selections.length === 0"
-          @click="doDelete(crud.selections)"
-        >
-          强退
-        </el-button>
+        <template #left>
+          <el-button
+            class="filter-item"
+            type="danger"
+            :icon="Delete"
+            size="small"
+            :loading="delLoading"
+            :disabled="crud.selections.length === 0"
+            @click="doDelete(crud.selections)"
+          >
+            强退
+          </el-button>
+        </template>
       </crudOperation>
     </div>
     <!--表格渲染-->
@@ -33,7 +34,7 @@
       <el-table-column prop="browser" label="浏览器" />
       <el-table-column prop="loginTime" label="登录时间" />
       <el-table-column label="操作" width="70px" fixed="right">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-popover
             :ref="scope.$index"
             v-permission="['admin']"
@@ -42,10 +43,12 @@
           >
             <p>确定强制退出该用户吗？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="mini" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
+              <el-button size="small" text @click="$refs[scope.$index].doClose()">取消</el-button>
+              <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
             </div>
-            <el-button slot="reference" size="mini" type="text">强退</el-button>
+            <template #reference>
+              <el-button size="small" text>强退</el-button>
+            </template>
           </el-popover>
         </template>
       </el-table-column>
@@ -56,11 +59,13 @@
 </template>
 
 <script>
+import { ElMessageBox } from 'element-plus'
+import { Delete } from '@element-plus/icons-vue'
 import { del } from '@/api/monitor/online'
 import CRUD, { presenter, header, crud } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import crudOperation from '@crud/CRUD.operation'
-import pagination from '@crud/Pagination'
+import rrOperation from '@crud/RR.operation.vue'
+import crudOperation from '@crud/CRUD.operation.vue'
+import pagination from '@crud/Pagination.vue'
 
 export default {
   name: 'OnlineUser',
@@ -71,6 +76,7 @@ export default {
   mixins: [presenter(), header(), crud()],
   data() {
     return {
+      Delete,
       delLoading: false,
       permission: {}
     }
@@ -86,7 +92,7 @@ export default {
   },
   methods: {
     doDelete(datas) {
-      this.$confirm(`确认强退选中的${datas.length}个用户?`, '提示', {
+      ElMessageBox.confirm(`确认强退选中的${datas.length}个用户?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'

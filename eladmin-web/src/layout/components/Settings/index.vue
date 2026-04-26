@@ -28,7 +28,8 @@
 </template>
 
 <script>
-import ThemePicker from '@/components/ThemePicker'
+import { useSettingsStore } from '@/store'
+import ThemePicker from '@/components/ThemePicker/index.vue'
 
 export default {
   components: { ThemePicker },
@@ -38,44 +39,32 @@ export default {
   computed: {
     fixedHeader: {
       get() {
-        return this.$store.state.settings.fixedHeader
+        return useSettingsStore().fixedHeader
       },
       set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'fixedHeader',
-          value: val
-        })
+        useSettingsStore().changeSetting({ key: 'fixedHeader', value: val })
       }
     },
     tagsView: {
       get() {
-        return this.$store.state.settings.tagsView
+        return useSettingsStore().tagsView
       },
       set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'tagsView',
-          value: val
-        })
+        useSettingsStore().changeSetting({ key: 'tagsView', value: val })
       }
     },
     sidebarLogo: {
       get() {
-        return this.$store.state.settings.sidebarLogo
+        return useSettingsStore().sidebarLogo
       },
       set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'sidebarLogo',
-          value: val
-        })
+        useSettingsStore().changeSetting({ key: 'sidebarLogo', value: val })
       }
     }
   },
   methods: {
     themeChange(val) {
-      this.$store.dispatch('settings/changeSetting', {
-        key: 'theme',
-        value: val
-      })
+      useSettingsStore().changeSetting({ key: 'theme', value: val })
     }
   }
 }

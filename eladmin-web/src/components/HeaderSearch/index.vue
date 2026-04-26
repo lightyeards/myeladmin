@@ -21,6 +21,7 @@
 // fuse is a lightweight fuzzy-search module
 // make search results more in line with expectations
 import Fuse from 'fuse.js'
+import { usePermissionStore } from '@/store'
 import { resolveRoutePath } from '@/utils'
 
 export default {
@@ -36,7 +37,7 @@ export default {
   },
   computed: {
     routes() {
-      return this.$store.state.permission.routers
+      return usePermissionStore().routers
     }
   },
   watch: {
@@ -167,7 +168,7 @@ export default {
     display: inline-block;
     vertical-align: middle;
 
-   ::v-deep .el-input__inner {
+   :deep(.el-input__inner) {
       border-radius: 0;
       border: 0;
       padding-left: 0;

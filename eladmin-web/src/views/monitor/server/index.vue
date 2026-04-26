@@ -13,18 +13,20 @@
           <span>
             项目已不间断运行：{{ data.sys.day }}
           </span>
-          <i class="el-icon-refresh" style="margin-left: 40px" @click="init" />
+          <el-icon class="refresh-icon" style="margin-left: 40px" @click="init"><refresh /></el-icon>
         </div>
       </el-card>
       <el-card class="box-card">
-        <div slot="header" class="clearfix">
-          <span style="font-weight: bold;color: #666;font-size: 15px">状态</span>
-        </div>
+        <template #header>
+          <div class="clearfix">
+            <span style="font-weight: bold;color: #666;font-size: 15px">状态</span>
+          </div>
+        </template>
         <div>
           <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
             <div class="title">CPU使用率</div>
             <el-tooltip placement="top-end">
-              <div slot="content" style="font-size: 12px;">
+              <template #content><div style="font-size: 12px;">
                 <div style="padding: 3px;">
                   {{ data.cpu.name }}
                 </div>
@@ -38,6 +40,7 @@
                   {{ data.cpu.logic }}
                 </div>
               </div>
+              </template>
               <div class="content">
                 <el-progress type="dashboard" :percentage="parseFloat(data.cpu.used)" />
               </div>
@@ -47,7 +50,7 @@
           <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
             <div class="title">内存使用率</div>
             <el-tooltip placement="top-end">
-              <div slot="content" style="font-size: 12px;">
+              <template #content><div style="font-size: 12px;">
                 <div style="padding: 3px;">
                   总量：{{ data.memory.total }}
                 </div>
@@ -58,6 +61,7 @@
                   空闲：{{ data.memory.available }}
                 </div>
               </div>
+              </template>
               <div class="content">
                 <el-progress type="dashboard" :percentage="parseFloat(data.memory.usageRate)" />
               </div>
@@ -67,7 +71,7 @@
           <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
             <div class="title">交换区使用率</div>
             <el-tooltip placement="top-end">
-              <div slot="content" style="font-size: 12px;">
+              <template #content><div style="font-size: 12px;">
                 <div style="padding: 3px;">
                   总量：{{ data.swap.total }}
                 </div>
@@ -78,6 +82,7 @@
                   空闲：{{ data.swap.available }}
                 </div>
               </div>
+              </template>
               <div class="content">
                 <el-progress type="dashboard" :percentage="parseFloat(data.swap.usageRate)" />
               </div>
@@ -88,7 +93,7 @@
             <div class="title">磁盘使用率</div>
             <div class="content">
               <el-tooltip placement="top-end">
-                <div slot="content" style="font-size: 12px;">
+                <template #content><div style="font-size: 12px;">
                   <div style="padding: 3px">
                     总量：{{ data.disk.total }}
                   </div>
@@ -96,6 +101,7 @@
                     空闲：{{ data.disk.available }}
                   </div>
                 </div>
+                </template>
                 <div class="content">
                   <el-progress type="dashboard" :percentage="parseFloat(data.disk.usageRate)" />
                 </div>
@@ -110,21 +116,25 @@
         <el-row :gutter="6">
           <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" style="margin-bottom: 10px">
             <el-card class="box-card">
-              <div slot="header" class="clearfix">
-                <span style="font-weight: bold;color: #666;font-size: 15px">CPU使用率监控</span>
-              </div>
+              <template #header>
+                <div class="clearfix">
+                  <span style="font-weight: bold;color: #666;font-size: 15px">CPU使用率监控</span>
+                </div>
+              </template>
               <div>
-                <v-chart :options="cpuInfo" />
+                <v-chart :option="cpuInfo" />
               </div>
             </el-card>
           </el-col>
           <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" style="margin-bottom: 10px">
             <el-card class="box-card">
-              <div slot="header" class="clearfix">
-                <span style="font-weight: bold;color: #666;font-size: 15px">内存使用率监控</span>
-              </div>
+              <template #header>
+                <div class="clearfix">
+                  <span style="font-weight: bold;color: #666;font-size: 15px">内存使用率监控</span>
+                </div>
+              </template>
               <div>
-                <v-chart :options="memoryInfo" />
+                <v-chart :option="memoryInfo" />
               </div>
             </el-card>
           </el-col>
@@ -135,14 +145,12 @@
 </template>
 
 <script>
-import ECharts from 'vue-echarts'
-import 'echarts/lib/chart/line'
-import 'echarts/lib/component/polar'
+import VChart from 'vue-echarts'
 import { initData } from '@/api/data'
 export default {
   name: 'ServerMonitor',
   components: {
-    'v-chart': ECharts
+    'v-chart': VChart
   },
   data() {
     return {
@@ -169,16 +177,12 @@ export default {
           data: [],
           type: 'line',
           areaStyle: {
-            normal: {
-              color: 'rgb(32, 160, 255)' // 改变区域颜色
-            }
+            color: 'rgb(32, 160, 255)' // 改变区域颜色
           },
           itemStyle: {
-            normal: {
-              color: '#6fbae1',
-              lineStyle: {
-                color: '#6fbae1' // 改变折线颜色
-              }
+            color: '#6fbae1',
+            lineStyle: {
+              color: '#6fbae1' // 改变折线颜色
             }
           }
         }]
@@ -202,16 +206,12 @@ export default {
           data: [],
           type: 'line',
           areaStyle: {
-            normal: {
-              color: 'rgb(32, 160, 255)' // 改变区域颜色
-            }
+            color: 'rgb(32, 160, 255)' // 改变区域颜色
           },
           itemStyle: {
-            normal: {
-              color: '#6fbae1',
-              lineStyle: {
-                color: '#6fbae1' // 改变折线颜色
-              }
+            color: '#6fbae1',
+            lineStyle: {
+              color: '#6fbae1' // 改变折线颜色
             }
           }
         }]
@@ -226,7 +226,7 @@ export default {
       }, 2)
     }, 3500)
   },
-  destroyed() {
+  unmounted() {
     clearInterval(this.monitor)
   },
   methods: {
@@ -251,12 +251,12 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .box-card {
+ :deep(.box-card) {
     margin-bottom: 5px;
     span {
       margin-right: 28px;
     }
-    .el-icon-refresh {
+    .refresh-icon {
       margin-right: 10px;
       float: right;
       cursor:pointer;

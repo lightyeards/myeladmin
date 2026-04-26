@@ -1,8 +1,5 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Layout from '../layout/index'
-
-Vue.use(Router)
+import { createRouter, createWebHistory } from 'vue-router'
+import Layout from '@/layout/index.vue'
 
 export const constantRouterMap = [
   {
@@ -27,7 +24,7 @@ export const constantRouterMap = [
     hidden: true,
     children: [
       {
-        path: '/redirect/:path*',
+        path: '/redirect/:path(.*)*',
         component: () => import('@/views/features/redirect.vue')
       }
     ]
@@ -61,9 +58,10 @@ export const constantRouterMap = [
   }
 ]
 
-export default new Router({
-  // mode: 'hash',
-  mode: 'history',
-  scrollBehavior: () => ({ y: 0 }),
+const router = createRouter({
+  history: createWebHistory(),
+  scrollBehavior: () => ({ left: 0, top: 0 }),
   routes: constantRouterMap
 })
+
+export default router

@@ -1,6 +1,7 @@
+import { reactive } from 'vue'
+import { ElNotification } from 'element-plus'
 import { initData, download } from '@/api/data'
 import { parseTime, downloadFile } from '@/utils/index'
-import Vue from 'vue'
 
 /**
  * CRUD配置
@@ -132,8 +133,10 @@ function CRUD(options) {
         initData(crud.url, crud.getQueryParams()).then(data => {
           const table = crud.getTable()
           if (table && table.lazy) { // 懒加载子节点数据，清掉已加载的数据
-            table.store.states.treeData = {}
-            table.store.states.lazyTreeNodeMap = {}
+            if (table.store && table.store.states) {
+              table.store.states.treeData = {}
+              table.store.states.lazyTreeNodeMap = {}
+            }
           }
           crud.page.total = data.totalElements
           crud.data = data.content
@@ -296,11 +299,11 @@ function CRUD(options) {
       if (data instanceof Array) {
         delAll = true
         data.forEach(val => {
-          ids.push(this.getDataId(val))
+          ids.push(crud.getDataId(val))
         })
       } else {
-        ids.push(this.getDataId(data))
-        dataStatus = crud.getDataStatus(this.getDataId(data))
+        ids.push(crud.getDataId(data))
+        dataStatus = crud.getDataStatus(crud.getDataId(data))
       }
       if (!callVmHook(crud, CRUD.HOOK.beforeDelete, data)) {
         return
@@ -384,7 +387,7 @@ function CRUD(options) {
         query[key] = defaultQuery[key]
       })
       // 重置参数
-      this.params = {}
+      crud.params = {}
       if (toQuery) {
         crud.toQuery()
       }
@@ -400,12 +403,14 @@ function CRUD(options) {
       delete crud.form['updateBy']
       const form = data || (typeof crud.defaultForm === 'object' ? JSON.parse(JSON.stringify(crud.defaultForm)) : crud.defaultForm.apply(crud.findVM('form')))
       const crudFrom = crud.form
-      for (const key in form) {
-        if (crudFrom.hasOwnProperty(key)) {
-          crudFrom[key] = form[key]
-        } else {
-          Vue.set(crudFrom, key, form[key])
+      // 先清掉旧字段，避免残留
+      for (const key in crudFrom) {
+        if (Object.prototype.hasOwnProperty.call(crudFrom, key) && !Object.prototype.hasOwnProperty.call(form, key)) {
+          delete crudFrom[key]
         }
+      }
+      for (const key in form) {
+        crudFrom[key] = form[key]
       }
       // add by ghl 2020-10-04  页面重复添加信息时，下拉框的校验会存在，需要找工取消
       if (crud.findVM('form').$refs['form']) {
@@ -481,7 +486,7 @@ function CRUD(options) {
     toggleRowSelection(selection, data) {
       if (data.children) {
         data.children.forEach(val => {
-          selection.splice(selection.findIndex(item => this.getDataId(item) === this.getDataId(val)), 1)
+          selection.splice(selection.findIndex(item => crud.getDataId(item) === crud.getDataId(val)), 1)
           crud.getTable().toggleRowSelection(val, false)
           if (val.children) {
             crud.toggleRowSelection(selection, val)
@@ -493,52 +498,54 @@ function CRUD(options) {
       return crud.vms.find(vm => vm && vm.type === type).vm
     },
     notify(title, type = CRUD.NOTIFICATION_TYPE.INFO) {
-      crud.vms[0].vm.$notify({
+      ElNotification({
         title,
         type,
         duration: 2500
       })
     },
     updateProp(name, value) {
-      Vue.set(crud.props, name, value)
+      crud.props[name] = value
     },
     getDataId(data) {
-      return data[this.idField]
+      return data[crud.idField]
     },
     getTable() {
-      return this.findVM('presenter').$refs.table
+      return crud.findVM('presenter').$refs.table
+    },
+    /**
+     * 懒加载树形表格的展开子节点回调，由列表视图的 <el-table @expand-change="$crud.handleExpandChange"> 直接绑定。
+     * Vue 3 + Element Plus 已不再支持 `table.$on('expand-change', cb)`，故公开此方法。
+     */
+    handleExpandChange(row, expanded) {
+      if (!expanded) return
+      const table = crud.getTable()
+      if (!table || !table.store || !table.store.states) return
+      const lazyTreeNodeMap = table.store.states.lazyTreeNodeMap
+      const map = typeof lazyTreeNodeMap === 'object' && lazyTreeNodeMap !== null
+        ? (lazyTreeNodeMap.value || lazyTreeNodeMap)
+        : {}
+      row.children = map[crud.getDataId(row)]
+      if (row.children) {
+        row.children.forEach(ele => {
+          const id = crud.getDataId(ele)
+          if (crud.dataStatus[id] === undefined) {
+            crud.dataStatus[id] = {
+              delete: 0,
+              edit: 0
+            }
+          }
+        })
+      }
     },
     attchTable() {
-      const table = this.getTable()
-      this.updateProp('table', table)
-      const that = this
-      table.$on('expand-change', (row, expanded) => {
-        if (!expanded) {
-          return
-        }
-        const lazyTreeNodeMap = table.store.states.lazyTreeNodeMap
-        row.children = lazyTreeNodeMap[crud.getDataId(row)]
-        if (row.children) {
-          row.children.forEach(ele => {
-            const id = crud.getDataId(ele)
-            if (that.dataStatus[id] === undefined) {
-              that.dataStatus[id] = {
-                delete: 0,
-                edit: 0
-              }
-            }
-          })
-        }
-      })
+      // 兼容旧调用：现已通过模板上的 @expand-change 显式绑定 handleExpandChange
+      const table = crud.getTable()
+      crud.updateProp('table', table)
     }
   }
-  const crud = Object.assign({}, data)
-  // 可观测化
-  Vue.observable(crud)
-  // 附加方法
-  Object.assign(crud, methods)
-  // 记录初始默认的查询参数，后续重置查询时使用
-  Object.assign(crud, {
+  // 先用普通对象组装，再通过 reactive 转响应式（Vue 3 不再支持 Vue.observable + Object.freeze）
+  const crud = reactive(Object.assign({}, data, methods, {
     defaultQuery: JSON.parse(JSON.stringify(data.query)),
     // 预留4位存储：组件 主页、头部、分页、表单，调试查看也方便找
     vms: Array(4),
@@ -554,38 +561,36 @@ function CRUD(options) {
         vm: vm
       }
       if (index < 0) {
-        this.vms.push(vmObj)
+        crud.vms.push(vmObj)
         return
       }
       if (index < 4) { // 内置预留vm数
-        this.vms[index] = vmObj
+        crud.vms[index] = vmObj
         return
       }
-      this.vms.length = Math.max(this.vms.length, index)
-      this.vms.splice(index, 1, vmObj)
+      crud.vms.length = Math.max(crud.vms.length, index)
+      crud.vms.splice(index, 1, vmObj)
     },
     /**
      * 取消注册组件实例
      * @param {*} vm 组件实例
      */
     unregisterVM(type, vm) {
-      for (let i = this.vms.length - 1; i >= 0; i--) {
-        if (this.vms[i] === undefined) {
+      for (let i = crud.vms.length - 1; i >= 0; i--) {
+        if (crud.vms[i] === undefined) {
           continue
         }
-        if (this.vms[i].type === type && this.vms[i].vm === vm) {
+        if (crud.vms[i].type === type && crud.vms[i].vm === vm) {
           if (i < 4) { // 内置预留vm数
-            this.vms[i] = undefined
+            crud.vms[i] = undefined
           } else {
-            this.vms.splice(i, 1)
+            crud.vms.splice(i, 1)
           }
           break
         }
       }
     }
-  })
-  // 冻结处理，需要扩展数据的话，使用crud.updateProp(name, value)，以crud.props.name形式访问，这个是响应式的，可以做数据绑定
-  Object.freeze(crud)
+  }))
   return crud
 }
 
@@ -619,7 +624,7 @@ function mergeOptions(src, opts) {
     ...src
   }
   for (const key in src) {
-    if (opts.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(opts, key)) {
       optsRet[key] = opts[key]
     }
   }
@@ -633,7 +638,6 @@ function mergeOptions(src, opts) {
  */
 function lookupCrud(vm, tag) {
   tag = tag || vm.$attrs['crud-tag'] || 'default'
-  // function lookupCrud(vm, tag) {
   if (vm.$crud) {
     const ret = vm.$crud[tag]
     if (ret) {
@@ -682,7 +686,7 @@ function presenter(crud) {
         }
       }
     },
-    destroyed() {
+    unmounted() {
       for (const k in this.$crud) {
         this.$crud[k].unregisterVM('presenter', this)
       }
@@ -711,7 +715,7 @@ function header() {
       this.crud = lookupCrud(this)
       this.crud.registerVM('header', this, 1)
     },
-    destroyed() {
+    unmounted() {
       this.crud.unregisterVM('header', this)
     }
   }
@@ -732,7 +736,7 @@ function pagination() {
       this.crud = lookupCrud(this)
       this.crud.registerVM('pagination', this, 2)
     },
-    destroyed() {
+    unmounted() {
       this.crud.unregisterVM('pagination', this)
     }
   }
@@ -757,7 +761,7 @@ function form(defaultForm) {
       this.crud.defaultForm = defaultForm
       this.crud.resetForm()
     },
-    destroyed() {
+    unmounted() {
       this.crud.unregisterVM('form', this)
     }
   }
@@ -781,7 +785,7 @@ function crud(options = {}) {
       this.crud = lookupCrud(this)
       this.crud.registerVM(options.type, this)
     },
-    destroyed() {
+    unmounted() {
       this.crud.unregisterVM(options.type, this)
     }
   }

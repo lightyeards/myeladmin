@@ -1,7 +1,9 @@
+import { useAppStore } from '@/store'
+
 export default {
   computed: {
     device() {
-      return this.$store.state.app.device
+      return useAppStore().device
     }
   },
   mounted() {
@@ -14,11 +16,13 @@ export default {
       const $subMenu = this.$refs.subMenu
       if ($subMenu) {
         const handleMouseleave = $subMenu.handleMouseleave
-        $subMenu.handleMouseleave = (e) => {
-          if (this.device === 'mobile') {
-            return
+        if (typeof handleMouseleave === 'function') {
+          $subMenu.handleMouseleave = (e) => {
+            if (this.device === 'mobile') {
+              return
+            }
+            handleMouseleave(e)
           }
-          handleMouseleave(e)
         }
       }
     }

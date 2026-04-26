@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 
 import 'echarts/theme/macarons' // echarts theme
 import { debounce } from '@/utils'
@@ -37,7 +37,7 @@ export default {
     }, 100)
     window.addEventListener('resize', this.__resizeHandler)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (!this.chart) {
       return
     }
@@ -87,9 +87,7 @@ export default {
             return [item[1], item[0], item[2] || '-']
           }),
           label: {
-            normal: {
-              show: true
-            }
+            show: true
           },
           itemStyle: {
             emphasis: {

@@ -21,12 +21,13 @@
       <span style="color: #C0C0C0;margin-left: 10px;">SMTP port</span>
     </el-form-item>
     <el-form-item label="">
-      <el-button :loading="loading" size="medium" type="primary" @click="doSubmit">保存配置</el-button>
+      <el-button :loading="loading" size="default" type="primary" @click="doSubmit">保存配置</el-button>
     </el-form-item>
   </el-form>
 </template>
 
 <script>
+import { ElNotification } from 'element-plus'
 import { get, update } from '@/api/tools/email'
 export default {
   name: 'Config',
@@ -67,7 +68,7 @@ export default {
         if (valid) {
           this.loading = true
           update(this.form).then(res => {
-            this.$notify({
+            ElNotification({
               title: '修改成功',
               type: 'success',
               duration: 2500

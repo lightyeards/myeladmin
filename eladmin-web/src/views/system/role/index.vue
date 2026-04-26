@@ -4,14 +4,14 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.blurry" size="small" clearable placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.blurry" size="small" clearable placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
       <crudOperation :permission="permission" />
     </div>
     <!-- 表单渲染 -->
-    <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="520px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
       <el-form ref="form" :inline="true" :model="form" :rules="rules" size="small" label-width="80px">
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="form.name" style="width: 380px;" />
@@ -30,14 +30,13 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="form.dataScope === '自定义'" label="数据权限" prop="depts">
-          <treeselect
+          <el-tree-select
             v-model="deptDatas"
-            :load-options="loadDepts"
-            :options="depts"
-            :flat="true"
-            :auto-select-descendants="true"
-            :default-expand-level="1"
+            :data="depts"
+            :props="treeSelectProps"
             multiple
+            check-strictly
+            :render-after-expand="false"
             style="width: 380px"
             placeholder="请选择"
           />
@@ -46,31 +45,35 @@
           <el-input v-model="form.description" style="width: 380px;" rows="5" type="textarea" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="text" @click="crud.cancelCU">取消</el-button>
-        <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button text @click="crud.cancelCU">取消</el-button>
+          <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
     <el-row :gutter="15">
       <!--角色管理-->
       <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="17" style="margin-bottom: 10px">
         <el-card class="box-card" shadow="never">
-          <div slot="header" class="clearfix">
-            <span class="role-span">角色列表</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <span class="role-span">角色列表</span>
+            </div>
+          </template>
           <el-table ref="table" v-loading="crud.loading" highlight-current-row style="width: 100%;" :data="crud.data" @selection-change="crud.selectionChangeHandler" @current-change="handleCurrentChange">
             <el-table-column :selectable="checkboxT" type="selection" width="55" />
             <el-table-column prop="name" label="名称" />
             <el-table-column prop="dataScope" label="数据权限" />
             <el-table-column prop="level" label="角色级别" />
             <el-table-column :show-overflow-tooltip="true" prop="description" label="描述">
-              <template slot-scope="scope">
+              <template #default="scope">
                 {{ scope.row.description == null ? '-' : scope.row.description }}
               </template>
             </el-table-column>
             <el-table-column :show-overflow-tooltip="true" width="135px" prop="createTime" label="创建日期" />
             <el-table-column v-if="checkPer(['admin','roles:edit','roles:del'])" label="操作" width="130px" align="center" fixed="right">
-              <template slot-scope="scope">
+              <template #default="scope">
                 <udOperation
                   v-if="scope.row.level >= level"
                   :data="scope.row"
@@ -86,21 +89,23 @@
       <!-- 菜单授权 -->
       <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="7">
         <el-card class="box-card" shadow="never">
-          <div slot="header" class="clearfix">
-            <el-tooltip class="item" effect="dark" content="选择指定角色分配菜单" placement="top">
-              <span class="role-span">菜单分配</span>
-            </el-tooltip>
-            <el-button
-              v-permission="['admin','roles:edit']"
-              :disabled="!showButton"
-              :loading="menuLoading"
-              icon="el-icon-check"
-              size="mini"
-              style="float: right; padding: 6px 9px"
-              type="primary"
-              @click="saveMenu"
-            >保存</el-button>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <el-tooltip class="item" effect="dark" content="选择指定角色分配菜单" placement="top">
+                <span class="role-span">菜单分配</span>
+              </el-tooltip>
+              <el-button
+                v-permission="['admin','roles:edit']"
+                :disabled="!showButton"
+                :loading="menuLoading"
+                :icon="Check"
+                size="small"
+                style="float: right; padding: 6px 9px"
+                type="primary"
+                @click="saveMenu"
+              >保存</el-button>
+            </div>
+          </template>
           <el-tree
             ref="menu"
             lazy
@@ -121,30 +126,31 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus'
+import { Check } from '@element-plus/icons-vue'
 import crudRoles from '@/api/system/role'
 import { getDepts, getDeptSuperior } from '@/api/system/dept'
 import { getMenusTree, getChild } from '@/api/system/menu'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import crudOperation from '@crud/CRUD.operation'
-import udOperation from '@crud/UD.operation'
-import pagination from '@crud/Pagination'
-import Treeselect from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-import { LOAD_CHILDREN_OPTIONS } from '@riophae/vue-treeselect'
-import DateRangePicker from '@/components/DateRangePicker'
+import rrOperation from '@crud/RR.operation.vue'
+import crudOperation from '@crud/CRUD.operation.vue'
+import udOperation from '@crud/UD.operation.vue'
+import pagination from '@crud/Pagination.vue'
+import DateRangePicker from '@/components/DateRangePicker/index.vue'
 
 const defaultForm = { id: null, name: null, depts: [], description: null, dataScope: '全部', level: 3 }
 export default {
   name: 'Role',
-  components: { Treeselect, pagination, crudOperation, rrOperation, udOperation, DateRangePicker },
+  components: { pagination, crudOperation, rrOperation, udOperation, DateRangePicker },
   cruds() {
     return CRUD({ title: '角色', url: 'api/roles', crudMethod: { ...crudRoles }})
   },
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+      Check,
       defaultProps: { children: 'children', label: 'label', isLeaf: 'leaf' },
+      treeSelectProps: { label: 'name', value: 'id', children: 'children' },
       dateScopes: ['全部', '本级', '自定义'], level: 3,
       currentId: 0, menuLoading: false, showButton: false,
       menus: [], menuIds: [], depts: [], deptDatas: [], // 多选时使用
@@ -158,6 +164,12 @@ export default {
           { required: true, message: '请输入名称', trigger: 'blur' }
         ]
       }
+    }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
     }
   },
   created() {
@@ -180,12 +192,15 @@ export default {
     [CRUD.HOOK.beforeToAdd](crud, form) {
       this.deptDatas = []
       form.menus = null
+      this.getDepts()
     },
     // 编辑前初始化自定义数据权限的部门信息
     [CRUD.HOOK.beforeToEdit](crud, form) {
       this.deptDatas = []
       if (form.dataScope === '自定义') {
         this.getSupDepts(form.depts)
+      } else {
+        this.getDepts()
       }
       const _this = this
       form.depts.forEach(function(dept) {
@@ -197,7 +212,7 @@ export default {
     // 提交前做的操作
     [CRUD.HOOK.afterValidateCU](crud) {
       if (crud.form.dataScope === '自定义' && this.deptDatas.length === 0) {
-        this.$message({
+        ElMessage({
           message: '自定义数据权限不能为空',
           type: 'warning'
         })
@@ -314,22 +329,6 @@ export default {
         }
       })
     },
-    // 获取弹窗内部门数据
-    loadDepts({ action, parentNode, callback }) {
-      if (action === LOAD_CHILDREN_OPTIONS) {
-        getDepts({ enabled: true, pid: parentNode.id }).then(res => {
-          parentNode.children = res.content.map(function(obj) {
-            if (obj.hasChildren) {
-              obj.children = null
-            }
-            return obj
-          })
-          setTimeout(() => {
-            callback()
-          }, 200)
-        })
-      }
-    },
     // 如果数据权限为自定义则获取部门数据
     changeScope() {
       if (this.form.dataScope === '自定义') {
@@ -351,14 +350,7 @@ export default {
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .el-input-number .el-input__inner {
+ :deep(.el-input-number .el-input__inner) {
     text-align: left;
-  }
- ::v-deep .vue-treeselect__multi-value{
-    margin-bottom: 0;
-  }
- ::v-deep .vue-treeselect__multi-value-item{
-    border: 0;
-    padding: 0;
   }
 </style>

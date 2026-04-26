@@ -15,8 +15,8 @@
 
 <script>
 import { header } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import DateRangePicker from '@/components/DateRangePicker'
+import rrOperation from '@crud/RR.operation.vue'
+import DateRangePicker from '@/components/DateRangePicker/index.vue'
 export default {
   components: { rrOperation, DateRangePicker },
   mixins: [header()]

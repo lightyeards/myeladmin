@@ -8,12 +8,12 @@
       <div class="head-container">
         <div v-if="crud.props.searchToggle">
           <!-- 搜索 -->
-          <el-input v-model="query.label" clearable size="small" placeholder="输入字典标签查询" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery" />
+          <el-input v-model="query.label" clearable size="small" placeholder="输入字典标签查询" style="width: 200px;" class="filter-item" @keyup.enter="toQuery" />
           <rrOperation />
         </div>
       </div>
       <!--表单组件-->
-      <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible="crud.status.cu > 0" :title="crud.status.title" width="500px">
+      <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
           <el-form-item label="字典标签" prop="label">
             <el-input v-model="form.label" style="width: 370px;" />
@@ -25,10 +25,12 @@
             <el-input-number v-model.number="form.dictSort" :min="0" :max="999" controls-position="right" style="width: 370px;" />
           </el-form-item>
         </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button type="text" @click="crud.cancelCU">取消</el-button>
-          <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-        </div>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button text @click="crud.cancelCU">取消</el-button>
+            <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+          </div>
+        </template>
       </el-dialog>
       <!--表格渲染-->
       <el-table ref="table" v-loading="crud.loading" :data="crud.data" highlight-current-row style="width: 100%;" @selection-change="crud.selectionChangeHandler">
@@ -39,7 +41,7 @@
         <el-table-column prop="value" label="字典值" />
         <el-table-column prop="dictSort" label="排序" />
         <el-table-column v-if="checkPer(['admin','dict:edit','dict:del'])" label="操作" width="130px" align="center" fixed="right">
-          <template slot-scope="scope">
+          <template #default="scope">
             <udOperation
               :data="scope.row"
               :permission="permission"
@@ -56,9 +58,9 @@
 <script>
 import crudDictDetail from '@/api/system/dictDetail'
 import CRUD, { presenter, header, form } from '@crud/crud'
-import pagination from '@crud/Pagination'
-import rrOperation from '@crud/RR.operation'
-import udOperation from '@crud/UD.operation'
+import pagination from '@crud/Pagination.vue'
+import rrOperation from '@crud/RR.operation.vue'
+import udOperation from '@crud/UD.operation.vue'
 
 const defaultForm = { id: null, label: null, value: null, dictSort: 999 }
 
@@ -104,12 +106,18 @@ export default {
         del: ['admin', 'dict:del']
       }
     }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
+    }
   }
 }
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .el-input-number .el-input__inner {
+ :deep(.el-input-number .el-input__inner) {
     text-align: left;
   }
 </style>

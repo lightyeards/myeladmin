@@ -1,5 +1,5 @@
 <template>
-  <el-dialog append-to-body :close-on-click-modal="false" :visible.sync="dialog" title="执行脚本" width="400px">
+  <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="执行脚本" width="400px">
     <el-form ref="form" :rules="rules" size="small">
       <el-upload
         :action="databaseUploadApi"
@@ -10,24 +10,32 @@
         class="upload-demo"
         drag
       >
-        <i class="el-icon-upload" />
+        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
         <div class="el-upload__text">
           将文件拖到此处，或
           <em>点击上传</em>
         </div>
-        <div slot="tip" class="el-upload__tip">上传后，系统会自动执行SQL脚本</div>
+        <template #tip>
+          <div class="el-upload__tip">上传后，系统会自动执行SQL脚本</div>
+        </template>
       </el-upload>
     </el-form>
-    <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="cancel">关闭</el-button>
-    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="cancel">关闭</el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { ElNotification } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
+import { useApiStore } from '@/store'
 import { getToken } from '@/utils/auth'
 export default {
+  components: { UploadFilled },
   props: {
     databaseInfo: {
       type: Object,
@@ -47,7 +55,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['databaseUploadApi'])
+    ...mapState(useApiStore, ['databaseUploadApi'])
   },
   mounted() {
   },
@@ -57,13 +65,13 @@ export default {
     },
     handleSuccess(response, file, fileList) {
       if (response === 'success') {
-        this.$notify({
+        ElNotification({
           title: '执行成功',
           type: 'success',
           duration: 2500
         })
       } else {
-        this.$notify({
+        ElNotification({
           title: response,
           type: 'error',
           duration: 0
@@ -72,7 +80,7 @@ export default {
     },
     handleError(e, file, fileList) {
       const msg = JSON.parse(e.message)
-      this.$notify({
+      ElNotification({
         title: msg.message,
         type: 'error',
         duration: 0

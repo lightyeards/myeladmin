@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggle-click="toggleSideBar" />
 
     <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
 
@@ -25,38 +25,43 @@
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
           <img :src="user.avatarName ? baseApi + '/avatar/' + user.avatarName : Avatar" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+          <el-icon><caret-bottom /></el-icon>
         </div>
-        <el-dropdown-menu slot="dropdown">
-          <span style="display:block;" @click="show = true">
-            <el-dropdown-item>
-              布局设置
-            </el-dropdown-item>
-          </span>
-          <router-link to="/user/center">
-            <el-dropdown-item>
-              个人中心
-            </el-dropdown-item>
-          </router-link>
-          <span style="display:block;" @click="open">
-            <el-dropdown-item divided>
-              退出登录
-            </el-dropdown-item>
-          </span>
-        </el-dropdown-menu>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <span style="display:block;" @click="show = true">
+              <el-dropdown-item>
+                布局设置
+              </el-dropdown-item>
+            </span>
+            <router-link to="/user/center">
+              <el-dropdown-item>
+                个人中心
+              </el-dropdown-item>
+            </router-link>
+            <span style="display:block;" @click="open">
+              <el-dropdown-item divided>
+                退出登录
+              </el-dropdown-item>
+            </span>
+          </el-dropdown-menu>
+        </template>
       </el-dropdown>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import Doc from '@/components/Doc'
-import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import Search from '@/components/HeaderSearch'
+import { mapState } from 'pinia'
+import { ElMessageBox } from 'element-plus'
+import { CaretBottom } from '@element-plus/icons-vue'
+import { useAppStore, useUserStore, useApiStore, useSettingsStore } from '@/store'
+import Breadcrumb from '@/components/Breadcrumb/index.vue'
+import Hamburger from '@/components/Hamburger/index.vue'
+import Doc from '@/components/Doc/index.vue'
+import Screenfull from '@/components/Screenfull/index.vue'
+import SizeSelect from '@/components/SizeSelect/index.vue'
+import Search from '@/components/HeaderSearch/index.vue'
 import Avatar from '@/assets/images/avatar.png'
 
 export default {
@@ -66,7 +71,8 @@ export default {
     Screenfull,
     SizeSelect,
     Search,
-    Doc
+    Doc,
+    CaretBottom
   },
   data() {
     return {
@@ -75,18 +81,15 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'device',
-      'user',
-      'baseApi'
-    ]),
+    ...mapState(useAppStore, ['sidebar', 'device']),
+    ...mapState(useUserStore, ['user']),
+    ...mapState(useApiStore, ['baseApi']),
     show: {
       get() {
-        return this.$store.state.settings.showSettings
+        return useSettingsStore().showSettings
       },
       set(val) {
-        this.$store.dispatch('settings/changeSetting', {
+        useSettingsStore().changeSetting({
           key: 'showSettings',
           value: val
         })
@@ -95,10 +98,10 @@ export default {
   },
   methods: {
     toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
+      useAppStore().toggleSideBar()
     },
     open() {
-      this.$confirm('确定注销并退出系统吗？', '提示', {
+      ElMessageBox.confirm('确定注销并退出系统吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -107,7 +110,7 @@ export default {
       })
     },
     logout() {
-      this.$store.dispatch('LogOut').then(() => {
+      useUserStore().logOut().then(() => {
         location.reload()
       })
     }

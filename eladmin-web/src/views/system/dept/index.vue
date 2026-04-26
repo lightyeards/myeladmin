@@ -4,7 +4,7 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.name" clearable size="small" placeholder="输入部门名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.name" clearable size="small" placeholder="输入部门名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <el-select v-model="query.enabled" clearable size="small" placeholder="状态" class="filter-item" style="width: 90px" @change="crud.toQuery">
           <el-option v-for="item in enabledTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
@@ -14,7 +14,7 @@
       <crudOperation :permission="permission" />
     </div>
     <!--表单组件-->
-    <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="500px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
       <el-form ref="form" inline :model="form" :rules="rules" size="small" label-width="80px">
         <el-form-item label="部门名称" prop="name">
           <el-input v-model="form.name" style="width: 370px;" />
@@ -35,22 +35,28 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="状态" prop="enabled">
-          <el-radio v-for="item in dict.dept_status" :key="item.id" v-model="form.enabled" :label="item.value">{{ item.label }}</el-radio>
+          <el-radio-group v-model="form.enabled">
+            <el-radio v-for="item in dict.dept_status" :key="item.id" :label="item.value">{{ item.label }}</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item v-if="form.isTop === '0'" style="margin-bottom: 0;" label="上级部门" prop="pid">
-          <treeselect
+          <el-tree-select
             v-model="form.pid"
-            :load-options="loadDepts"
-            :options="depts"
+            :data="depts"
+            :props="treeSelectProps"
+            check-strictly
+            :render-after-expand="false"
             style="width: 370px;"
             placeholder="选择上级类目"
           />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="text" @click="crud.cancelCU">取消</el-button>
-        <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button text @click="crud.cancelCU">取消</el-button>
+          <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
     <!--表格渲染-->
     <el-table
@@ -69,7 +75,7 @@
       <el-table-column label="名称" prop="name" />
       <el-table-column label="排序" prop="deptSort" />
       <el-table-column label="状态" align="center" prop="enabled">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-switch
             v-model="scope.row.enabled"
             :disabled="scope.row.id === 1"
@@ -81,7 +87,7 @@
       </el-table-column>
       <el-table-column prop="createTime" label="创建日期" />
       <el-table-column v-if="checkPer(['admin','dept:edit','dept:del'])" label="操作" width="130px" align="center" fixed="right">
-        <template slot-scope="scope">
+        <template #default="scope">
           <udOperation
             :data="scope.row"
             :permission="permission"
@@ -95,20 +101,18 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from 'element-plus'
 import crudDept from '@/api/system/dept'
-import Treeselect from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-import { LOAD_CHILDREN_OPTIONS } from '@riophae/vue-treeselect'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import crudOperation from '@crud/CRUD.operation'
-import udOperation from '@crud/UD.operation'
-import DateRangePicker from '@/components/DateRangePicker'
+import rrOperation from '@crud/RR.operation.vue'
+import crudOperation from '@crud/CRUD.operation.vue'
+import udOperation from '@crud/UD.operation.vue'
+import DateRangePicker from '@/components/DateRangePicker/index.vue'
 
 const defaultForm = { id: null, name: null, isTop: '1', subCount: 0, pid: null, deptSort: 999, enabled: 'true' }
 export default {
   name: 'Dept',
-  components: { Treeselect, crudOperation, rrOperation, udOperation, DateRangePicker },
+  components: { crudOperation, rrOperation, udOperation, DateRangePicker },
   cruds() {
     return CRUD({ title: '部门', url: 'api/dept', crudMethod: { ...crudDept }})
   },
@@ -118,6 +122,7 @@ export default {
   data() {
     return {
       depts: [],
+      treeSelectProps: { label: 'name', value: 'id', children: 'children', isLeaf: 'leaf' },
       rules: {
         name: [
           { required: true, message: '请输入名称', trigger: 'blur' }
@@ -135,6 +140,12 @@ export default {
         { key: 'true', display_name: '正常' },
         { key: 'false', display_name: '禁用' }
       ]
+    }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
     }
   },
   methods: {
@@ -188,25 +199,21 @@ export default {
       })
     },
     // 获取弹窗内部门数据
-    loadDepts({ action, parentNode, callback }) {
-      if (action === LOAD_CHILDREN_OPTIONS) {
-        crudDept.getDepts({ enabled: true, pid: parentNode.id }).then(res => {
-          parentNode.children = res.content.map(function(obj) {
-            if (obj.hasChildren) {
-              obj.children = null
-            }
-            return obj
-          })
-          setTimeout(() => {
-            callback()
-          }, 100)
+    loadDepts(node, resolve) {
+      crudDept.getDepts({ enabled: true, pid: node.data.id }).then(res => {
+        const nodes = res.content.map(function(obj) {
+          if (obj.hasChildren) {
+            obj.children = null
+          }
+          return obj
         })
-      }
+        resolve(nodes)
+      })
     },
     // 提交前的验证
     [CRUD.HOOK.afterValidateCU]() {
       if (this.form.pid !== null && this.form.pid === this.form.id) {
-        this.$message({
+        ElMessage({
           message: '上级部门不能为空',
           type: 'warning'
         })
@@ -219,7 +226,7 @@ export default {
     },
     // 改变状态
     changeEnabled(data, val) {
-      this.$confirm('此操作将 "' + this.dict.label.dept_status[val] + '" ' + data.name + '部门, 是否继续？', '提示', {
+      ElMessageBox.confirm('此操作将 "' + this.dict.label.dept_status[val] + '" ' + data.name + '部门, 是否继续？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -242,13 +249,12 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .vue-treeselect__control,::v-deep .vue-treeselect__placeholder,::v-deep .vue-treeselect__single-value {
+ :deep(.el-tree-select__placeholder),
+ :deep(.el-tree-select__single-value) {
     height: 30px;
     line-height: 30px;
   }
-</style>
-<style rel="stylesheet/scss" lang="scss" scoped>
- ::v-deep .el-input-number .el-input__inner {
+ :deep(.el-input-number .el-input__inner) {
     text-align: left;
   }
 </style>

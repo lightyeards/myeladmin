@@ -5,15 +5,21 @@
         v-for="tag in visitedViews"
         ref="tag"
         :key="tag.path"
+        v-slot="{ navigate }"
         :class="isActive(tag)?'active':''"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
-        tag="span"
-        class="tags-view-item"
-        @click.middle.native="closeSelectedTag(tag)"
-        @contextmenu.prevent.native="openMenu(tag,$event)"
+        custom
       >
-        {{ tag.title }}
-        <span v-if="!tag.meta.affix" class="el-icon-close" @click.prevent.stop="closeSelectedTag(tag)" />
+        <span
+          class="tags-view-item"
+          :class="isActive(tag)?'active':''"
+          @click="navigate"
+          @click.middle="closeSelectedTag(tag)"
+          @contextmenu.prevent="openMenu(tag,$event)"
+        >
+          {{ tag.title }}
+          <el-icon v-if="!tag.meta.affix" class="tags-view-item-close" @click.prevent.stop="closeSelectedTag(tag)"><close /></el-icon>
+        </span>
       </router-link>
     </scroll-pane>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
@@ -26,11 +32,14 @@
 </template>
 
 <script>
-import ScrollPane from './ScrollPane'
+import { mapState } from 'pinia'
+import { useTagsViewStore, usePermissionStore } from '@/store'
+import { Close } from '@element-plus/icons-vue'
+import ScrollPane from './ScrollPane.vue'
 import { resolveRoutePath } from '@/utils'
 
 export default {
-  components: { ScrollPane },
+  components: { ScrollPane, Close },
   data() {
     return {
       visible: false,
@@ -41,12 +50,8 @@ export default {
     }
   },
   computed: {
-    visitedViews() {
-      return this.$store.state.tagsView.visitedViews
-    },
-    routes() {
-      return this.$store.state.permission.routers
-    }
+    ...mapState(useTagsViewStore, ['visitedViews']),
+    ...mapState(usePermissionStore, { routes: 'routers' })
   },
   watch: {
     $route() {
@@ -95,14 +100,14 @@ export default {
       for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
-          this.$store.dispatch('tagsView/addVisitedView', tag)
+          useTagsViewStore().addVisitedView(tag)
         }
       }
     },
     addTags() {
       const { name } = this.$route
       if (name) {
-        this.$store.dispatch('tagsView/addView', this.$route)
+        useTagsViewStore().addView(this.$route)
       }
       return false
     },
@@ -114,7 +119,7 @@ export default {
             this.$refs.scrollPane.moveToTarget(tag)
             // when query is different then update
             if (tag.to.fullPath !== this.$route.fullPath) {
-              this.$store.dispatch('tagsView/updateVisitedView', this.$route)
+              useTagsViewStore().updateVisitedView(this.$route)
             }
             break
           }
@@ -122,7 +127,7 @@ export default {
       })
     },
     refreshSelectedTag(view) {
-      this.$store.dispatch('tagsView/delCachedView', view).then(() => {
+      useTagsViewStore().delCachedView(view).then(() => {
         const { fullPath } = view
         this.$nextTick(() => {
           this.$router.replace({
@@ -132,7 +137,7 @@ export default {
       })
     },
     closeSelectedTag(view) {
-      this.$store.dispatch('tagsView/delView', view).then(({ visitedViews }) => {
+      useTagsViewStore().delView(view).then(({ visitedViews }) => {
         if (this.isActive(view)) {
           this.toLastView(visitedViews, view)
         }
@@ -140,12 +145,12 @@ export default {
     },
     closeOthersTags() {
       this.$router.push(this.selectedTag)
-      this.$store.dispatch('tagsView/delOthersViews', this.selectedTag).then(() => {
+      useTagsViewStore().delOthersViews(this.selectedTag).then(() => {
         this.moveToCurrentTag()
       })
     },
     closeAllTags(view) {
-      this.$store.dispatch('tagsView/delAllViews').then(({ visitedViews }) => {
+      useTagsViewStore().delAllViews().then(({ visitedViews }) => {
         if (this.affixTags.some(tag => tag.path === view.path)) {
           return
         }
@@ -263,7 +268,7 @@ export default {
 //reset element css of el-icon-close
 .tags-view-wrapper {
   .tags-view-item {
-    .el-icon-close {
+    .tags-view-item-close {
       width: 16px;
       height: 16px;
       vertical-align: 2px;
@@ -271,11 +276,6 @@ export default {
       text-align: center;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
-      &:before {
-        transform: scale(.6);
-        display: inline-block;
-        vertical-align: -3px;
-      }
       &:hover {
         background-color: #b4bccc;
         color: #fff;

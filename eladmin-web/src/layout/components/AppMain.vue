@@ -5,22 +5,25 @@
         <router-view :key="key" />
       </keep-alive>
     </transition>
-    <el-backtop :bottom="50" :right="40"><i class="el-icon-caret-top" /></el-backtop>
-    <div v-if="$store.state.settings.showFooter" id="el-main-footer">
-      <span v-html="$store.state.settings.footerTxt" />
-      <span v-if="$store.state.settings.caseNumber"> ⋅ </span>
-      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ $store.state.settings.caseNumber }}</a>
+    <el-backtop :bottom="50" :right="40"><el-icon><caret-top /></el-icon></el-backtop>
+    <div v-if="showFooter" id="el-main-footer">
+      <span v-html="footerTxt" />
+      <span v-if="caseNumber"> ⋅ </span>
+      <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">{{ caseNumber }}</a>
     </div>
   </section>
 </template>
 
 <script>
+import { CaretTop } from '@element-plus/icons-vue'
+import { mapState } from 'pinia'
+import { useTagsViewStore, useSettingsStore } from '@/store'
 export default {
   name: 'AppMain',
+  components: { CaretTop },
   computed: {
-    cachedViews() {
-      return this.$store.state.tagsView.cachedViews
-    },
+    ...mapState(useTagsViewStore, ['cachedViews']),
+    ...mapState(useSettingsStore, ['showFooter', 'footerTxt', 'caseNumber']),
     key() {
       return this.$route.path
     }

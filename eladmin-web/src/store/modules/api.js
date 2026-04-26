@@ -1,7 +1,10 @@
+import { defineStore } from 'pinia'
+
 // 适配 Nginx 反向代理
 const baseUrl = import.meta.env.VITE_APP_BASE_API === '/' ? '' : import.meta.env.VITE_APP_BASE_API
-const api = {
-  state: {
+
+export const useApiStore = defineStore('api', {
+  state: () => ({
     // 部署包上传
     deployUploadApi: baseUrl + '/api/deploy/upload',
     // SQL脚本上传
@@ -20,7 +23,5 @@ const api = {
     fileUploadApi: baseUrl + '/api/localStorage',
     // baseUrl，
     baseApi: baseUrl
-  }
-}
-
-export default api
+  })
+})

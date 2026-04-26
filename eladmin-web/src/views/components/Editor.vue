@@ -11,8 +11,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import WangEditor from '@/components/WangEditor/index'
+import { mapState } from 'pinia'
+import { useApiStore } from '@/store'
+import WangEditor from '@/components/WangEditor/index.vue'
 
 export default {
   name: 'Editor',
@@ -24,10 +25,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'imagesUploadApi',
-      'baseApi'
-    ])
+    ...mapState(useApiStore, ['imagesUploadApi', 'baseApi'])
   },
   mounted() {
   }

@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { useSettingsStore } from '@/store'
 import { addClass, removeClass } from '@/utils'
 
 export default {
@@ -27,17 +28,14 @@ export default {
   computed: {
     show: {
       get() {
-        return this.$store.state.settings.showSettings
+        return useSettingsStore().showSettings
       },
       set(val) {
-        this.$store.dispatch('settings/changeSetting', {
-          key: 'showSettings',
-          value: val
-        })
+        useSettingsStore().changeSetting({ key: 'showSettings', value: val })
       }
     },
     theme() {
-      return this.$store.state.settings.theme
+      return useSettingsStore().theme
     }
   },
   watch: {
@@ -56,7 +54,7 @@ export default {
     this.insertToBody()
     this.addEventClick()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     const elx = this.$refs.rightPanel
     elx.remove()
   },

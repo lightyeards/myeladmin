@@ -1,21 +1,13 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import getters from './getters'
+import { createPinia } from 'pinia'
 
-Vue.use(Vuex)
+const pinia = createPinia()
 
-// Vite-native module auto-discovery
-const modulesFiles = import.meta.glob('./modules/*.js', { eager: true })
+export default pinia
 
-const modules = Object.entries(modulesFiles).reduce((acc, [filePath, mod]) => {
-  const moduleName = filePath.replace(/^\.\/modules\/(.*)\.js$/, '$1')
-  acc[moduleName] = mod.default
-  return acc
-}, {})
-
-const store = new Vuex.Store({
-  modules,
-  getters
-})
-
-export default store
+// 重新导出所有 stores 方便统一引入
+export { useUserStore } from './modules/user'
+export { useAppStore } from './modules/app'
+export { useSettingsStore } from './modules/settings'
+export { useTagsViewStore } from './modules/tagsView'
+export { useApiStore } from './modules/api'
+export { usePermissionStore } from './modules/permission'

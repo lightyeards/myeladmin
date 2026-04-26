@@ -4,26 +4,27 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.blurry" clearable size="small" placeholder="输入内容模糊搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.blurry" clearable size="small" placeholder="输入内容模糊搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
       <crudOperation :permission="permission">
         <!-- 新增 -->
-        <el-button
-          slot="left"
-          v-permission="['admin','storage:add']"
-          class="filter-item"
-          size="mini"
-          type="primary"
-          icon="el-icon-upload"
-          @click="crud.toAdd"
-        >上传
-        </el-button>
+        <template #left>
+          <el-button
+            v-permission="['admin','storage:add']"
+            class="filter-item"
+            size="small"
+            type="primary"
+            :icon="Upload"
+            @click="crud.toAdd"
+          >上传
+          </el-button>
+        </template>
       </crudOperation>
     </div>
     <!--表单组件-->
-    <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.add ? '文件上传' : '编辑文件'" width="500px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.add ? '文件上传' : '编辑文件'" width="500px">
       <el-form ref="form" :model="form" size="small" label-width="80px">
         <el-form-item label="文件名">
           <el-input v-model="form.name" style="width: 370px;" />
@@ -40,22 +41,24 @@
             :on-error="handleError"
             :action="fileUploadApi + '?name=' + form.name"
           >
-            <div class="eladmin-upload"><i class="el-icon-upload" /> 添加文件</div>
-            <div slot="tip" class="el-upload__tip">可上传任意格式文件，且不超过100M</div>
+            <div class="eladmin-upload"><el-icon><upload /></el-icon> 添加文件</div>
+            <template #tip><div class="el-upload__tip">可上传任意格式文件，且不超过100M</div></template>
           </el-upload>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="text" @click="crud.cancelCU">取消</el-button>
-        <el-button v-if="crud.status.add" :loading="loading" type="primary" @click="upload">确认</el-button>
-        <el-button v-else :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button text @click="crud.cancelCU">取消</el-button>
+          <el-button v-if="crud.status.add" :loading="loading" type="primary" @click="upload">确认</el-button>
+          <el-button v-else :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
     <!--表格渲染-->
     <el-table ref="table" v-loading="crud.loading" :data="crud.data" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
       <el-table-column type="selection" width="55" />
       <el-table-column prop="name" label="文件名">
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-popover
             :content="'file/' + scope.row.type + '/' + scope.row.realName"
             placement="top-start"
@@ -63,20 +66,21 @@
             width="200"
             trigger="hover"
           >
-            <a
-              slot="reference"
-              :href="baseApi + '/file/' + scope.row.type + '/' + scope.row.realName"
-              class="el-link--primary"
-              style="word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color: #1890ff;font-size: 13px;"
-              target="_blank"
-            >
-              {{ scope.row.name }}
-            </a>
+            <template #reference>
+              <a
+                :href="baseApi + '/file/' + scope.row.type + '/' + scope.row.realName"
+                class="el-link--primary"
+                style="word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color: #1890ff;font-size: 13px;"
+                target="_blank"
+              >
+                {{ scope.row.name }}
+              </a>
+            </template>
           </el-popover>
         </template>
       </el-table-column>
       <el-table-column prop="path" label="预览图">
-        <template slot-scope="{row}">
+        <template #default="{row}">
           <el-image
             :src=" baseApi + '/file/' + row.type + '/' + row.realName"
             :preview-src-list="[baseApi + '/file/' + row.type + '/' + row.realName]"
@@ -84,9 +88,11 @@
             lazy
             class="el-avatar"
           >
-            <div slot="error">
-              <i class="el-icon-document" />
-            </div>
+            <template #error>
+              <div>
+                <el-icon><document /></el-icon>
+              </div>
+            </template>
           </el-image>
         </template>
       </el-table-column>
@@ -102,7 +108,10 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'pinia'
+import { Upload, Document } from '@element-plus/icons-vue'
+import { ElMessage, ElNotification } from 'element-plus'
+import { useApiStore } from '@/store'
 import { getToken } from '@/utils/auth'
 import crudFile from '@/api/tools/localStorage'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
@@ -113,7 +122,7 @@ import DateRangePicker from '@/components/DateRangePicker'
 
 const defaultForm = { id: null, name: '' }
 export default {
-  components: { pagination, crudOperation, rrOperation, DateRangePicker },
+  components: { pagination, crudOperation, rrOperation, DateRangePicker, Upload, Document },
   cruds() {
     return CRUD({ title: '文件', url: 'api/localStorage', crudMethod: { ...crudFile }})
   },
@@ -130,10 +139,20 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
+    ...mapState(useApiStore, [
       'baseApi',
       'fileUploadApi'
-    ])
+    ]),
+    cuVisible: {
+      get() {
+        return this.crud.status.cu > 0
+      },
+      set(val) {
+        if (!val) {
+          this.crud.cancelCU()
+        }
+      }
+    }
   },
   created() {
     this.crud.optShow.add = false
@@ -148,7 +167,7 @@ export default {
       isLt2M = file.size / 1024 / 1024 < 100
       if (!isLt2M) {
         this.loading = false
-        this.$message.error('上传文件大小不能超过 100MB!')
+        ElMessage.error('上传文件大小不能超过 100MB!')
       }
       this.form.name = file.name
       return isLt2M
@@ -163,7 +182,7 @@ export default {
     // 监听上传失败
     handleError(e, file, fileList) {
       const msg = JSON.parse(e.message)
-      this.$notify({
+      ElNotification({
         title: msg.message,
         type: 'error',
         duration: 2500
@@ -175,10 +194,10 @@ export default {
 </script>
 
 <style scoped>
- ::v-deep .el-image__error, .el-image__placeholder{
+ :deep(.el-image__error), .el-image__placeholder {
     background: none;
   }
- ::v-deep .el-image-viewer__wrapper{
+ :deep(.el-image-viewer__wrapper) {
     top: 55px;
   }
 </style>

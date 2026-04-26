@@ -1,36 +1,26 @@
+import { defineStore } from 'pinia'
 import variables from '@/assets/styles/element-variables.module.js'
 import defaultSettings from '@/settings'
+
 const { tagsView, fixedHeader, sidebarLogo, showFooter, footerTxt, caseNumber } = defaultSettings
 
-const state = {
-  theme: variables.theme,
-  showSettings: false,
-  tagsView: tagsView,
-  fixedHeader: fixedHeader,
-  sidebarLogo: sidebarLogo,
-  showFooter: showFooter,
-  footerTxt: footerTxt,
-  caseNumber: caseNumber
-}
+export const useSettingsStore = defineStore('settings', {
+  state: () => ({
+    theme: variables.theme,
+    showSettings: false,
+    tagsView,
+    fixedHeader,
+    sidebarLogo,
+    showFooter,
+    footerTxt,
+    caseNumber
+  }),
 
-const mutations = {
-  CHANGE_SETTING: (state, { key, value }) => {
-    if (state.hasOwnProperty(key)) {
-      state[key] = value
+  actions: {
+    changeSetting({ key, value }) {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        this[key] = value
+      }
     }
   }
-}
-
-const actions = {
-  changeSetting({ commit }, data) {
-    commit('CHANGE_SETTING', data)
-  }
-}
-
-export default {
-  namespaced: true,
-  state,
-  mutations,
-  actions
-}
-
+})

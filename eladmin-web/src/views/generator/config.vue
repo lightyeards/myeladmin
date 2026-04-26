@@ -3,62 +3,64 @@
     <el-row :gutter="15">
       <el-col style="margin-bottom: 10px">
         <el-card class="box-card" shadow="never">
-          <div slot="header" class="clearfix">
-            <span class="role-span">字段配置：{{ tableName }}</span>
-            <el-button
-              :loading="genLoading"
-              icon="el-icon-s-promotion"
-              size="mini"
-              style="float: right; padding: 6px 9px;"
-              type="success"
-              @click="toGen"
-            >保存&生成</el-button>
-            <el-button
-              :loading="columnLoading"
-              icon="el-icon-check"
-              size="mini"
-              style="float: right; padding: 6px 9px;margin-right: 9px"
-              type="primary"
-              @click="saveColumnConfig"
-            >保存</el-button>
-            <el-tooltip class="item" effect="dark" content="数据库中表字段变动时使用该功能" placement="top-start">
+          <template #header>
+            <div class="clearfix">
+              <span class="role-span">字段配置：{{ tableName }}</span>
               <el-button
-                :loading="syncLoading"
-                icon="el-icon-refresh"
-                size="mini"
+                :loading="genLoading"
+                :icon="Promotion"
+                size="small"
                 style="float: right; padding: 6px 9px;"
-                type="info"
-                @click="sync"
-              >同步</el-button>
-            </el-tooltip>
-          </div>
+                type="success"
+                @click="toGen"
+              >保存&生成</el-button>
+              <el-button
+                :loading="columnLoading"
+                :icon="Check"
+                size="small"
+                style="float: right; padding: 6px 9px;margin-right: 9px"
+                type="primary"
+                @click="saveColumnConfig"
+              >保存</el-button>
+              <el-tooltip class="item" effect="dark" content="数据库中表字段变动时使用该功能" placement="top-start">
+                <el-button
+                  :loading="syncLoading"
+                  :icon="Refresh"
+                  size="small"
+                  style="float: right; padding: 6px 9px;"
+                  type="info"
+                  @click="sync"
+                >同步</el-button>
+              </el-tooltip>
+            </div>
+          </template>
           <el-form size="small" label-width="90px">
             <el-table v-loading="loading" :data="data" :max-height="tableHeight" size="small" style="width: 100%;margin-bottom: 15px">
               <el-table-column prop="columnName" width="110px" label="字段名称" />
               <el-table-column prop="columnType" width="110px" label="字段类型" />
               <el-table-column prop="remark" label="字段描述">
-                <template slot-scope="scope">
-                  <el-input v-model="data[scope.$index].remark" size="mini" class="edit-input" />
+                <template #default="scope">
+                  <el-input v-model="data[scope.$index].remark" size="small" class="edit-input" />
                 </template>
               </el-table-column>
               <el-table-column align="center" label="必填" width="80px">
-                <template slot-scope="scope">
+                <template #default="scope">
                   <el-checkbox v-model="data[scope.$index].notNull" />
                 </template>
               </el-table-column>
               <el-table-column align="center" label="列表" width="80px">
-                <template slot-scope="scope">
+                <template #default="scope">
                   <el-checkbox v-model="data[scope.$index].listShow" />
                 </template>
               </el-table-column>
               <el-table-column align="center" label="表单" width="80px">
-                <template slot-scope="scope">
+                <template #default="scope">
                   <el-checkbox v-model="data[scope.$index].formShow" />
                 </template>
               </el-table-column>
               <el-table-column label="表单类型">
-                <template slot-scope="scope">
-                  <el-select v-model="data[scope.$index].formType" filterable class="edit-input" clearable size="mini" placeholder="请选择">
+                <template #default="scope">
+                  <el-select v-model="data[scope.$index].formType" filterable class="edit-input" clearable size="small" placeholder="请选择">
                     <el-option
                       label="文本框"
                       value="Input"
@@ -83,8 +85,8 @@
                 </template>
               </el-table-column>
               <el-table-column label="查询方式">
-                <template slot-scope="scope">
-                  <el-select v-model="data[scope.$index].queryType" filterable class="edit-input" clearable size="mini" placeholder="请选择">
+                <template #default="scope">
+                  <el-select v-model="data[scope.$index].queryType" filterable class="edit-input" clearable size="small" placeholder="请选择">
                     <el-option
                       label="="
                       value="="
@@ -117,8 +119,8 @@
                 </template>
               </el-table-column>
               <el-table-column label="关联字典">
-                <template slot-scope="scope">
-                  <el-select v-model="data[scope.$index].dictName" filterable class="edit-input" clearable size="mini" placeholder="请选择">
+                <template #default="scope">
+                  <el-select v-model="data[scope.$index].dictName" filterable class="edit-input" clearable size="small" placeholder="请选择">
                     <el-option v-for="item in dicts" :key="item.id" :label="item.remark === '' ? item.name : item.remark" :value="item.name" />
                   </el-select>
                 </template>
@@ -129,17 +131,19 @@
       </el-col>
       <el-col>
         <el-card class="box-card" shadow="never">
-          <div slot="header" class="clearfix">
-            <span class="role-span">生成配置</span>
-            <el-button
-              :loading="configLoading"
-              icon="el-icon-check"
-              size="mini"
-              style="float: right; padding: 6px 9px"
-              type="primary"
-              @click="doSubmit"
-            >保存</el-button>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <span class="role-span">生成配置</span>
+              <el-button
+                :loading="configLoading"
+                :icon="Check"
+                size="small"
+                style="float: right; padding: 6px 9px"
+                type="primary"
+                @click="doSubmit"
+              >保存</el-button>
+            </div>
+          </template>
           <el-form ref="form" :model="form" :rules="rules" size="small" label-width="78px">
             <el-form-item label="作者名称" prop="author">
               <el-input v-model="form.author" style="width: 40%" />
@@ -170,7 +174,7 @@
               <span style="color: #C0C0C0;margin-left: 10px;">默认不去除表前缀，可自定义</span>
             </el-form-item>
             <el-form-item label="是否覆盖" prop="cover">
-              <el-radio-group v-model="form.cover" size="mini" style="width: 40%">
+              <el-radio-group v-model="form.cover" size="small" style="width: 40%">
                 <el-radio-button label="true">是</el-radio-button>
                 <el-radio-button label="false">否</el-radio-button>
               </el-radio-group>
@@ -184,13 +188,14 @@
 </template>
 
 <script>
+import { Promotion, Check, Refresh } from '@element-plus/icons-vue'
 import crud from '@/mixins/crud'
 import { update, get } from '@/api/generator/genConfig'
 import { save, sync, generator } from '@/api/generator/generator'
 import { getDicts } from '@/api/system/dict'
 export default {
   name: 'GeneratorConfig',
-  components: {},
+  components: { Promotion, Check, Refresh },
   mixins: [crud],
   data() {
     return {
@@ -305,7 +310,7 @@ export default {
 </style>
 
 <style scoped>
- ::v-deep .input-with-select .el-input-group__prepend {
+ :deep(.input-with-select .el-input-group__prepend) {
     background-color: #fff;
   }
 </style>

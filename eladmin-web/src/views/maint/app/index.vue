@@ -4,25 +4,26 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.name" clearable placeholder="输入名称搜索" style="width: 200px" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.name" clearable placeholder="输入名称搜索" style="width: 200px" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
       <crudOperation :permission="permission">
-        <el-button
-          slot="left"
-          v-permission="['admin','app:add']"
-          :disabled="!currentRow"
-          class="filter-item"
-          size="mini"
-          type="primary"
-          icon="el-icon-plus"
-          @click="copy"
-        >复制</el-button>
+        <template #left>
+          <el-button
+            v-permission="['admin','app:add']"
+            :disabled="!currentRow"
+            class="filter-item"
+            size="small"
+            type="primary"
+            :icon="Plus"
+            @click="copy"
+          >复制</el-button>
+        </template>
       </crudOperation>
     </div>
     <!--表单组件-->
-    <el-dialog append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="800px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="800px">
       <el-form ref="form" :model="form" :rules="rules" size="small" label-width="100px">
         <el-form-item label="应用名称" prop="name">
           <el-input v-model="form.name" style="width: 670px" placeholder="部署后的文件或者目录名称，用于备份" />
@@ -46,10 +47,12 @@
           <el-input v-model="form.startScript" :rows="3" type="textarea" autosize style="width: 670px" placeholder="" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="text" @click="crud.cancelCU">取消</el-button>
-        <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button text @click="crud.cancelCU">取消</el-button>
+          <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+        </div>
+      </template>
     </el-dialog>
     <!--表格渲染-->
     <el-table ref="table" v-loading="crud.loading" :data="crud.data" highlight-current-row style="width: 100%" @selection-change="crud.selectionChangeHandler" @current-change="handleCurrentChange">
@@ -61,7 +64,7 @@
       <el-table-column prop="backupPath" label="备份目录" />
       <el-table-column prop="createTime" label="创建日期" />
       <el-table-column v-if="checkPer(['admin','app:edit','app:del'])" label="操作" width="150px" align="center">
-        <template slot-scope="scope">
+        <template #default="scope">
           <udOperation
             :data="scope.row"
             :permission="permission"
@@ -75,18 +78,19 @@
 </template>
 
 <script>
+import { Plus } from '@element-plus/icons-vue'
 import crudApp from '@/api/maint/app'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import crudOperation from '@crud/CRUD.operation'
-import udOperation from '@crud/UD.operation'
-import pagination from '@crud/Pagination'
-import DateRangePicker from '@/components/DateRangePicker'
+import rrOperation from '@crud/RR.operation.vue'
+import crudOperation from '@crud/CRUD.operation.vue'
+import udOperation from '@crud/UD.operation.vue'
+import pagination from '@crud/Pagination.vue'
+import DateRangePicker from '@/components/DateRangePicker/index.vue'
 
 const defaultForm = { id: null, name: null, port: 8080, uploadPath: '/opt/upload', deployPath: '/opt/app', backupPath: '/opt/backup', startScript: null, deployScript: null }
 export default {
   name: 'App',
-  components: { pagination, crudOperation, rrOperation, udOperation, DateRangePicker },
+  components: { pagination, crudOperation, rrOperation, udOperation, DateRangePicker, Plus },
   cruds() {
     return CRUD({ title: '应用', url: 'api/app', crudMethod: { ...crudApp }})
   },
@@ -122,6 +126,12 @@ export default {
           { required: true, message: '请输入部署脚本', trigger: 'blur' }
         ]
       }
+    }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
     }
   },
   methods: {

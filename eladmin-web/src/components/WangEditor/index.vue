@@ -11,21 +11,22 @@
       :style="{'height': editorHeight +'px', 'overflow-y': 'hidden'}"
       :default-config="editorConfig"
       :mode="editMode"
-      @onCreated="onCreated"
+      @on-created="onCreated"
     />
   </div>
 </template>
 
 <script>
+import { mapState } from 'pinia'
+import { useApiStore } from '@/store'
 import { upload } from '@/utils/upload'
 import { Toolbar, Editor } from '@wangeditor/editor-for-vue'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'WangEditor',
   components: { Toolbar, Editor },
   props: {
-    value: {
+    modelValue: {
       type: String,
       required: false,
       default: ''
@@ -36,6 +37,7 @@ export default {
       default: 420
     }
   },
+  emits: ['update:modelValue'],
   data() {
     const _this = this
     return {
@@ -57,27 +59,32 @@ export default {
       }},
       editMode: 'simple',
       editor: null,
-      editValue: null
+      editValue: ''
     }
   },
   computed: {
-    ...mapGetters([
-      'imagesUploadApi',
-      'baseApi'
-    ])
+    ...mapState(useApiStore, ['imagesUploadApi', 'baseApi'])
   },
   watch: {
-    editValue(newVal, oldVal) {
-      this.$emit('input', newVal)
+    editValue(newVal) {
+      this.$emit('update:modelValue', newVal)
+    },
+    modelValue(newVal) {
+      if (newVal !== this.editValue) {
+        this.editValue = newVal
+      }
     }
   },
-  mounted() {
-
+  beforeUnmount() {
+    if (this.editor) {
+      this.editor.destroy()
+      this.editor = null
+    }
   },
   methods: {
     onCreated(editor) {
-      this.editor = Object.seal(editor)
-      this.editValue = this.value
+      this.editor = editor
+      this.editValue = this.modelValue
     }
   }
 }
@@ -87,7 +94,7 @@ export default {
 .text {
   text-align:left;
 }
-::v-deep .w-e-text-container {
+:deep(.w-e-text-container) {
   height: 420px !important;
 }
 </style>

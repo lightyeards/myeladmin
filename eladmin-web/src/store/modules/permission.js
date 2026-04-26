@@ -1,31 +1,25 @@
+import { defineStore } from 'pinia'
 import { constantRouterMap } from '@/router/routers'
-import Layout from '@/layout/index'
-import ParentView from '@/components/ParentView'
+import Layout from '@/layout/index.vue'
+import ParentView from '@/components/ParentView.vue'
 
-const permission = {
-  state: {
+export const usePermissionStore = defineStore('permission', {
+  state: () => ({
     routers: constantRouterMap,
     addRouters: [],
     sidebarRouters: []
-  },
-  mutations: {
-    SET_ROUTERS: (state, routers) => {
-      state.addRouters = routers
-      state.routers = constantRouterMap.concat(routers)
-    },
-    SET_SIDEBAR_ROUTERS: (state, routers) => {
-      state.sidebarRouters = constantRouterMap.concat(routers)
-    }
-  },
+  }),
+
   actions: {
-    GenerateRoutes({ commit }, asyncRouter) {
-      commit('SET_ROUTERS', asyncRouter)
+    generateRoutes(asyncRouter) {
+      this.addRouters = asyncRouter
+      this.routers = constantRouterMap.concat(asyncRouter)
     },
-    SetSidebarRouters({ commit }, sidebarRouter) {
-      commit('SET_SIDEBAR_ROUTERS', sidebarRouter)
+    setSidebarRouters(sidebarRouter) {
+      this.sidebarRouters = constantRouterMap.concat(sidebarRouter)
     }
   }
-}
+})
 
 export const filterAsyncRouter = (routers, lastRouter = false, type = false) => { // 遍历后台传来的路由字符串，转换为组件对象
   return routers.filter(router => {
@@ -54,7 +48,7 @@ export const filterAsyncRouter = (routers, lastRouter = false, type = false) => 
 
 function filterChildren(childrenMap, lastRouter = false) {
   var children = []
-  childrenMap.forEach((el, index) => {
+  childrenMap.forEach((el) => {
     if (el.children && el.children.length) {
       if (el.component === 'ParentView') {
         el.children.forEach(c => {
@@ -89,9 +83,7 @@ export const loadView = (view) => {
   if (alt) {
     return viewModules[alt]
   }
-  // eslint-disable-next-line no-console
+
   console.error(`[loadView] 未找到视图: ${view}`)
   return null
 }
-
-export default permission

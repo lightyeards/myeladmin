@@ -1,41 +1,40 @@
+import { defineStore } from 'pinia'
 import { login, getInfo, logout } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
-const user = {
-  state: {
+export const useUserStore = defineStore('user', {
+  state: () => ({
     token: getToken(),
     user: {},
     roles: [],
     // 第一次加载菜单时用到
     loadMenus: false
-  },
-
-  mutations: {
-    SET_TOKEN: (state, token) => {
-      state.token = token
-    },
-    SET_USER: (state, user) => {
-      state.user = user
-    },
-    SET_ROLES: (state, roles) => {
-      state.roles = roles
-    },
-    SET_LOAD_MENUS: (state, loadMenus) => {
-      state.loadMenus = loadMenus
-    }
-  },
+  }),
 
   actions: {
+    setToken(token) {
+      this.token = token
+    },
+    setUser(user) {
+      this.user = user
+    },
+    setRoles(roles) {
+      this.roles = roles
+    },
+    setLoadMenus(loadMenus) {
+      this.loadMenus = loadMenus
+    },
+
     // 登录
-    Login({ commit }, userInfo) {
+    login(userInfo) {
       const rememberMe = userInfo.rememberMe
       return new Promise((resolve, reject) => {
         login(userInfo.username, userInfo.password, userInfo.code, userInfo.uuid).then(res => {
           setToken(res.token, rememberMe)
-          commit('SET_TOKEN', res.token)
-          setUserInfo(res.user, commit)
+          this.token = res.token
+          applyUserInfo(this, res.user)
           // 第一次加载菜单时用到， 具体见 src 目录下的 permission.js
-          commit('SET_LOAD_MENUS', true)
+          this.loadMenus = true
           resolve()
         }).catch(error => {
           reject(error)
@@ -44,51 +43,48 @@ const user = {
     },
 
     // 获取用户信息
-    GetInfo({ commit }) {
+    getInfo() {
       return new Promise((resolve, reject) => {
         getInfo().then(res => {
-          setUserInfo(res, commit)
+          applyUserInfo(this, res)
           resolve(res)
         }).catch(error => {
           reject(error)
         })
       })
     },
+
     // 登出
-    LogOut({ commit }) {
+    logOut() {
       return new Promise((resolve, reject) => {
-        logout().then(res => {
-          logOut(commit)
+        logout().then(() => {
+          clearAuth(this)
           resolve()
         }).catch(error => {
-          logOut(commit)
+          clearAuth(this)
           reject(error)
         })
       })
     },
 
-    updateLoadMenus({ commit }) {
-      return new Promise((resolve, reject) => {
-        commit('SET_LOAD_MENUS', false)
-      })
+    updateLoadMenus() {
+      this.loadMenus = false
     }
   }
-}
+})
 
-export const logOut = (commit) => {
-  commit('SET_TOKEN', '')
-  commit('SET_ROLES', [])
-  removeToken()
-}
-
-export const setUserInfo = (res, commit) => {
+function applyUserInfo(store, res) {
   // 如果没有任何权限，则赋予一个默认的权限，避免请求死循环
   if (res.roles.length === 0) {
-    commit('SET_ROLES', ['ROLE_SYSTEM_DEFAULT'])
+    store.roles = ['ROLE_SYSTEM_DEFAULT']
   } else {
-    commit('SET_ROLES', res.roles)
+    store.roles = res.roles
   }
-  commit('SET_USER', res.user)
+  store.user = res.user
 }
 
-export default user
+function clearAuth(store) {
+  store.token = ''
+  store.roles = []
+  removeToken()
+}
