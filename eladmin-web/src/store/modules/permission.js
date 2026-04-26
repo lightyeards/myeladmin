@@ -76,8 +76,22 @@ function filterChildren(childrenMap, lastRouter = false) {
   return children
 }
 
+// Vite 需要静态分析动态 import，预先收集所有候选 view
+const viewModules = import.meta.glob('@/views/**/*.vue')
+
 export const loadView = (view) => {
-  return (resolve) => require([`@/views/${view}`], resolve)
+  const target = `/src/views/${view}.vue`
+  if (viewModules[target]) {
+    return viewModules[target]
+  }
+  // 兼容相对路径写法
+  const alt = Object.keys(viewModules).find((k) => k.endsWith(`/views/${view}.vue`))
+  if (alt) {
+    return viewModules[alt]
+  }
+  // eslint-disable-next-line no-console
+  console.error(`[loadView] 未找到视图: ${view}`)
+  return null
 }
 
 export default permission

@@ -144,11 +144,11 @@
 ### 阶段 2 - 前端 Vue 3 迁移
 
 #### 2.1 构建工具切换
-- [ ] 新建 `vite.config.js`（迁移现有别名、proxy、压缩、SVG sprite 配置）
-- [ ] `package.json` scripts 切换为 `vite`/`vite build`
-- [ ] 移除 vue-cli、webpack 4 相关依赖
-- [ ] `index.html` 提到 `public/` 或根目录（Vite 约定）
-- [ ] Node 版本要求改为 `>=20`
+- [x] 新建 `vite.config.js`（迁移现有别名、proxy、压缩、SVG sprite 配置）
+- [x] `package.json` scripts 切换为 `vite`/`vite build`
+- [x] 移除 vue-cli、webpack 4 相关依赖
+- [x] `index.html` 提到 `public/` 或根目录（Vite 约定）
+- [x] Node 版本要求改为 `>=20`
 
 #### 2.2 核心框架升级
 - [ ] Vue 2.7 → 3.5.x
@@ -253,6 +253,21 @@
 | 2026-04-26 | 1.6 | AnonTagUtils 适配 PathPatternsRequestCondition | SB3 默认改用 PathPatterns，原 `getPatternsCondition()` 返回 null 导致所有 @AnonymousAccess URL 被静默丢弃，匿名端点全部 401；改为优先 `getPathPatternsCondition().getPatternValues()` |
 | 2026-04-26 | 1.7 | 应用启动成功 | Started AppRun in 22.689s @ Java 21 + SB 3.3.13 + Tomcat 10.1.42 + Druid + Redisson + Quartz + MyBatis-Plus |
 | 2026-04-26 | 1.7 | 关键端点 smoke test 全部 200 | /doc.html、/v3/api-docs、/druid/index.html、/auth/code（匿名验证码 Redis 写入正常） |
+| 2026-04-26 | 2.0 | Phase 2 计划制定完成 | plan: merry-squishing-starlight；策略：vite-first 过渡（先在 Vue 2.7 下切 Vite，再切 Vue 3）；treeselect → el-tree-select；包管理器：pnpm；原地改造 |
+| 2026-04-26 | 2.1 | 新建 `vite.config.js` | @vitejs/plugin-vue2 + plugin-vue2-jsx + vite-plugin-svg-icons；alias `@`/`@crud`；server.port 8013；proxy `/api` `/auth` → :8000；sass modern-compiler + silenceDeprecations |
+| 2026-04-26 | 2.1 | 新建 `index.html`（Vite 入口） | 移自 public/index.html，去 EJS `<%= BASE_URL %>` 占位，加 `<script type="module" src="/src/main.js">` |
+| 2026-04-26 | 2.1 | 新建 `.env.development` / `.env.production` | `VUE_APP_*` → `VITE_APP_*`；新增 `VITE_APP_BASE_API` |
+| 2026-04-26 | 2.1 | 删除 `vue.config.js` / `babel.config.js` / `postcss.config.js` / `public/index.html` | webpack 配置不再需要 |
+| 2026-04-26 | 2.1 | `package.json` scripts 全切换为 vite | `dev: vite` / `build: vite build` / `preview: vite preview`；`type: module`；engines.node `>=20` |
+| 2026-04-26 | 2.1 | `process.env.VUE_APP_*` → `import.meta.env.VITE_APP_*` | utils/request.js、store/modules/api.js、views/maint/deploy/deploy.vue 共 3 处 |
+| 2026-04-26 | 2.1 | `require.context(...)` → `import.meta.glob('...', { eager: true })` | components/IconSelect/requireIcons.js、store/index.js（getters 聚合）、views/components/icons/svg-icons.js、assets/icons/index.js 共 4 处 |
+| 2026-04-26 | 2.1 | SCSS `~@` 写法替换 | layout/index.vue 行 74-75 `~@/...` → `@/...`（Vite 已支持 alias） |
+| 2026-04-26 | 2.1 | Sidebar/Item.vue `<script>` → `<script lang="jsx">` | 仅此一处 .vue 内含 JSX；plugin-vue2-jsx 要求显式 lang；其他 .vue 已 grep 验证无 JSX |
+| 2026-04-26 | 2.1 | Sidebar/SidebarItem.vue 去除 `import path from 'path'` | Vite 不绑 node 内置；改纯字符串拼接 resolvePath |
+| 2026-04-26 | 2.1 | jsencrypt 深路径 import 修正 | utils/rsaEncrypt.js: `import JSEncrypt from 'jsencrypt/bin/jsencrypt.min'` → `import { JSEncrypt } from 'jsencrypt'`；Vite dep-scan 不识别旧深路径 |
+| 2026-04-26 | 2.1 | SCSS `:export {}` → 独立 .module.js | webpack css-loader 把 `:export` 当默认 JS 导出，Rollup/Vite 不支持；新增 `assets/styles/variables.module.js` 与 `element-variables.module.js`，更新 store/modules/settings.js + Sidebar/index.vue 两处 import |
+| 2026-04-26 | 2.1 | 新增 `vite-plugin-svg-icons` 替换 svg-sprite-loader | main.js 加 `import 'virtual:svg-icons-register'`；SvgIcon 组件保持不变 |
+| 2026-04-26 | 2.1 | dev / build / preview 全部通过 | `pnpm dev`：8013→8015 端口、main.js / App.vue / login.vue 转译 200；`pnpm build`：1659 modules / 25.7s；`pnpm preview`：8016 静态产物 200，html 含 module script + element-ui/echarts preload |
 
 ---
 

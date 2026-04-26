@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import path from 'path'
 import { isExternal } from '@/utils/validate'
+import { resolveRoutePath } from '@/utils'
 import Item from './Item'
 import AppLink from './Link'
 import FixiOSBug from './FixiOSBug'
@@ -88,7 +88,7 @@ export default {
       if (isExternal(this.basePath)) {
         return this.basePath
       }
-      return path.resolve(this.basePath, routePath)
+      return resolveRoutePath(this.basePath, routePath)
     }
   }
 }

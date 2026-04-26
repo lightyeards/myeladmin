@@ -3,6 +3,21 @@
  */
 
 /**
+ * 路由路径拼接：替代 Node 内置 path.resolve(base, target)
+ * - target 以 '/' 开头视为绝对路径
+ * - 否则把 base 与 target 拼接，规范化重复斜杠
+ * @param {string} base
+ * @param {string} target
+ * @returns {string}
+ */
+export function resolveRoutePath(base, target) {
+  if (!target) return base || '/'
+  if (target.startsWith('/')) return target
+  if (!base) return '/' + target
+  return (base.endsWith('/') ? base + target : base + '/' + target).replace(/\/+/g, '/')
+}
+
+/**
  * Parse the time to string
  * @param {(Object|string|number)} time
  * @param {string} cFormat
