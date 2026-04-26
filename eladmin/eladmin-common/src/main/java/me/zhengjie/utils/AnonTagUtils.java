@@ -53,25 +53,32 @@ public class AnonTagUtils {
             if (null != anonymousAccess) {
                 List<RequestMethod> requestMethods = new ArrayList<>(infoEntry.getKey().getMethodsCondition().getMethods());
                 RequestMethodEnum request = RequestMethodEnum.find(requestMethods.isEmpty() ? RequestMethodEnum.ALL.getType() : requestMethods.get(0).name());
-                if (infoEntry.getKey().getPatternsCondition()!=null) {
+                // Spring Boot 3 默认使用 PathPatternsRequestCondition，原 getPatternsCondition() 返回 null
+                Set<String> patterns = Collections.emptySet();
+                if (infoEntry.getKey().getPathPatternsCondition() != null) {
+                    patterns = infoEntry.getKey().getPathPatternsCondition().getPatternValues();
+                } else if (infoEntry.getKey().getPatternsCondition() != null) {
+                    patterns = infoEntry.getKey().getPatternsCondition().getPatterns();
+                }
+                if (!patterns.isEmpty()) {
                     switch (Objects.requireNonNull(request)) {
                         case GET:
-                            get.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            get.addAll(patterns);
                             break;
                         case POST:
-                            post.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            post.addAll(patterns);
                             break;
                         case PUT:
-                            put.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            put.addAll(patterns);
                             break;
                         case PATCH:
-                            patch.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            patch.addAll(patterns);
                             break;
                         case DELETE:
-                            delete.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            delete.addAll(patterns);
                             break;
                         default:
-                            all.addAll(infoEntry.getKey().getPatternsCondition().getPatterns());
+                            all.addAll(patterns);
                             break;
                     }
                 }

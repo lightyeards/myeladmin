@@ -22,7 +22,7 @@ import me.zhengjie.modules.maint.domain.DeployHistory;
 import me.zhengjie.modules.maint.domain.dto.DeployQueryCriteria;
 import me.zhengjie.utils.PageResult;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;

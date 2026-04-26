@@ -20,7 +20,7 @@ import ${package}.domain.dto.${className}QueryCriteria;
 import java.util.Map;
 import java.util.List;
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import me.zhengjie.utils.PageResult;

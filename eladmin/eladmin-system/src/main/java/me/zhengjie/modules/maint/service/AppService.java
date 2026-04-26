@@ -21,7 +21,7 @@ import me.zhengjie.modules.maint.domain.App;
 import me.zhengjie.modules.maint.domain.dto.AppQueryCriteria;
 import me.zhengjie.utils.PageResult;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;

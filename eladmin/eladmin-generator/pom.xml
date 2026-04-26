@@ -11,7 +11,7 @@
     <name>代码生成模块</name>
 
     <properties>
-        <configuration.version>1.10</configuration.version>
+        <configuration2.version>2.11.0</configuration2.version>
     </properties>
 
     <dependencies>
@@ -27,11 +27,17 @@
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/commons-configuration/commons-configuration -->
+        <!-- commons-configuration2（替代已停止维护的 commons-configuration 1.x） -->
         <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <version>${configuration.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>${configuration2.version}</version>
+        </dependency>
+        <!-- commons-configuration2 运行时需要 commons-beanutils -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
         </dependency>
     </dependencies>
 </project>

@@ -21,16 +21,22 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.3.13</version>
     </parent>
 
     <properties>
-        <logback.version>1.2.9</logback.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <fastjson2.version>2.0.54</fastjson2.version>
-        <druid.version>1.2.19</druid.version>
+        <druid.version>1.2.27</druid.version>
+        <knife4j.version>4.5.0</knife4j.version>
+        <mybatis-plus.version>3.5.14</mybatis-plus.version>
+        <redisson.version>3.43.0</redisson.version>
+        <mica-ip2region.version>3.4.3</mica-ip2region.version>
+        <aspectj.version>1.9.22</aspectj.version>
         <commons-pool2.version>2.11.1</commons-pool2.version>
     </properties>
 
@@ -83,7 +89,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.17.1</version>
+            <version>${redisson.version}</version>
         </dependency>
 
         <!-- Spring boot websocket -->
@@ -92,11 +98,18 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
-        <!-- mybatis -->
+        <!-- mybatis-plus（Spring Boot 3 起 starter 名称变更） -->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.3.1</version>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+
+        <!-- mybatis-plus 3.5.9+ 起 SQL 解析功能解耦，需单独引入（分页/多租户等插件依赖） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>${mybatis-plus.version}</version>
         </dependency>
 
         <!--spring boot 集成redis所需common-pool2-->
@@ -118,25 +131,11 @@
             <version>3.9.1</version>
         </dependency>
 
-        <!-- Swagger UI 相关 -->
+        <!-- Swagger UI 相关：Knife4j 4.x（Jakarta / OpenAPI 3） -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-spring-boot-starter</artifactId>
-            <version>3.0.3</version>
-            <exclusions>
-                <!-- 去掉 swagger-annotations 依赖，避免冲突 -->
-                <exclusion>
-                    <groupId>io.swagger</groupId>
-                    <artifactId>swagger-annotations</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- 添加swagger-annotations依赖 -->
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.5.22</version>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>${knife4j.version}</version>
         </dependency>
 
         <!--Mysql依赖包-->
@@ -148,29 +147,29 @@
         </dependency>
 
 
-        <!-- druid数据源驱动 -->
+        <!-- druid数据源驱动（Spring Boot 3 专用 starter） -->
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>druid-spring-boot-starter</artifactId>
+            <artifactId>druid-spring-boot-3-starter</artifactId>
             <version>${druid.version}</version>
         </dependency>
 
-        <!-- IP地址解析库 -->
+        <!-- IP地址解析库（适配 Spring Boot 3 的 3.x 系列） -->
         <dependency>
             <groupId>net.dreamlu</groupId>
             <artifactId>mica-ip2region</artifactId>
-            <version>2.7.18.9</version>
+            <version>${mica-ip2region.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>1.9.7</version>
+            <version>${aspectj.version}</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.9.7</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <!--lombok插件-->
@@ -206,7 +205,7 @@
 
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2-extension-spring5</artifactId>
+            <artifactId>fastjson2-extension-spring6</artifactId>
             <version>${fastjson2.version}</version>
         </dependency>
 
@@ -221,6 +220,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
             <version>1.13.0</version>
+        </dependency>
+
+        <!-- Guava: 项目代码中直接使用了 Lists / Sets / Maps / ImmutableList -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.4.0-jre</version>
         </dependency>
     </dependencies>
 

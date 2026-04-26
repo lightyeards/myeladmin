@@ -18,7 +18,9 @@ package me.zhengjie.modules.security.security;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +33,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
-import javax.servlet.http.HttpServletRequest;
-import java.security.Key;
+import jakarta.servlet.http.HttpServletRequest;
+import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TokenProvider implements InitializingBean {
 
-    private Key signingKey;
+    private SecretKey signingKey;
     private JwtParser jwtParser;
     private final RedisUtils redisUtils;
     private final SecurityProperties properties;
@@ -56,9 +58,9 @@ public class TokenProvider implements InitializingBean {
         // 解码Base64密钥并创建签名密钥
         byte[] keyBytes = Decoders.BASE64.decode(properties.getBase64Secret());
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
-        // 初始化 JwtParser
-        jwtParser = Jwts.parserBuilder()
-                .setSigningKey(signingKey) // 使用预生成的签名密钥
+        // 初始化 JwtParser（JJWT 0.12 起 parserBuilder 已废弃，改用 Jwts.parser()）
+        jwtParser = Jwts.parser()
+                .verifyWith(signingKey)
                 .build();
     }
 
@@ -75,14 +77,11 @@ public class TokenProvider implements InitializingBean {
         claims.put(AUTHORITIES_UID_KEY, user.getUser().getId());
         // 设置UUID，确保每次Token不一样
         claims.put(AUTHORITIES_UUID_KEY, IdUtil.simpleUUID());
-        // 直接调用 Jwts.builder() 创建新实例
+        // JJWT 0.12 起：claims/subject 取代 setClaims/setSubject，algorithm 由 Jwts.SIG 提供
         return Jwts.builder()
-                // 设置自定义 Claims
-                .setClaims(claims)
-                // 设置主题
-                .setSubject(user.getUsername())
-                // 使用预生成的签名密钥和算法签名
-                .signWith(signingKey, SignatureAlgorithm.HS512)
+                .claims(claims)
+                .subject(user.getUsername())
+                .signWith(signingKey, Jwts.SIG.HS512)
                 .compact();
     }
 
@@ -99,9 +98,10 @@ public class TokenProvider implements InitializingBean {
     }
 
     public Claims getClaims(String token) {
+        // JJWT 0.12 起：parseSignedClaims 取代 parseClaimsJws，getPayload 取代 getBody
         return jwtParser
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**

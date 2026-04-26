@@ -15,7 +15,7 @@
  */
 package me.zhengjie.modules.maint.domain.dto;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -28,18 +28,18 @@ import java.util.List;
 @Data
 public class DatabaseQueryCriteria{
 
-    @ApiModelProperty(value = "名称")
+    @Schema(description = "名称")
     private String name;
 
-    @ApiModelProperty(value = "数据源")
+    @Schema(description = "数据源")
     private String jdbcUrl;
 
-    @ApiModelProperty(value = "创建时间")
+    @Schema(description = "创建时间")
     private List<Timestamp> createTime;
 
-    @ApiModelProperty(value = "页码", example = "1")
+    @Schema(description = "页码", example = "1")
     private Integer page = 1;
 
-    @ApiModelProperty(value = "每页数据量", example = "10")
+    @Schema(description = "每页数据量", example = "10")
     private Integer size = 10;
 }

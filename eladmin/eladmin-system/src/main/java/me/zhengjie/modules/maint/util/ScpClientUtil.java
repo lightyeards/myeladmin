@@ -15,18 +15,21 @@
  */
 package me.zhengjie.modules.maint.util;
 
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.SCPClient;
 import com.google.common.collect.Maps;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import me.zhengjie.utils.StringUtils;
 
-import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 远程执行linux命令
+ * 远程执行linux命令（基于 JSch SFTP，原 ganymed-ssh2 已移除）
  * @author ZhangHouYing
  * @date 2019-08-10 10:06
  */
@@ -52,19 +55,17 @@ public class ScpClientUtil {
 	}
 
 	public void getFile(String remoteFile, String localTargetDirectory) {
-		Connection conn = new Connection(ip, port);
+		Session session = null;
+		ChannelSftp sftp = null;
 		try {
-			conn.connect();
-			boolean isAuthenticated = conn.authenticateWithPassword(username, password);
-			if (!isAuthenticated) {
-				System.err.println("authentication failed");
-			}
-			SCPClient client = new SCPClient(conn);
-			client.get(remoteFile, localTargetDirectory);
-		} catch (IOException ex) {
-			Logger.getLogger(SCPClient.class.getName()).log(Level.SEVERE, null, ex);
-		}finally{
-			conn.close();
+			session = createSession();
+			sftp = (ChannelSftp) session.openChannel("sftp");
+			sftp.connect();
+			sftp.get(remoteFile, localTargetDirectory);
+		} catch (JSchException | SftpException ex) {
+			Logger.getLogger(ScpClientUtil.class.getName()).log(Level.SEVERE, null, ex);
+		} finally {
+			closeQuietly(sftp, session);
 		}
 	}
 
@@ -77,26 +78,56 @@ public class ScpClientUtil {
 	}
 
 	public void putFile(String localFile, String remoteFileName, String remoteTargetDirectory, String mode) {
-		Connection conn = new Connection(ip, port);
+		Session session = null;
+		ChannelSftp sftp = null;
 		try {
-			conn.connect();
-			boolean isAuthenticated = conn.authenticateWithPassword(username, password);
-			if (!isAuthenticated) {
-				System.err.println("authentication failed");
-			}
-			SCPClient client = new SCPClient(conn);
+			session = createSession();
+			sftp = (ChannelSftp) session.openChannel("sftp");
+			sftp.connect();
 			if (StringUtils.isBlank(mode)) {
 				mode = "0600";
 			}
+			String remotePath;
 			if (remoteFileName == null) {
-				client.put(localFile, remoteTargetDirectory);
+				// 仿照原行为：未指定文件名时直接 put 到目录，使用本地文件名
+				sftp.put(localFile, remoteTargetDirectory);
+				String localName = localFile.replace('\\', '/');
+				localName = localName.substring(localName.lastIndexOf('/') + 1);
+				remotePath = remoteTargetDirectory.endsWith("/")
+						? remoteTargetDirectory + localName
+						: remoteTargetDirectory + "/" + localName;
 			} else {
-				client.put(localFile, remoteFileName, remoteTargetDirectory, mode);
+				remotePath = remoteTargetDirectory.endsWith("/")
+						? remoteTargetDirectory + remoteFileName
+						: remoteTargetDirectory + "/" + remoteFileName;
+				sftp.put(localFile, remotePath);
 			}
-		} catch (IOException ex) {
+			// SFTP 没有 SCP 那种 put-with-mode，需要单独 chmod
+			sftp.chmod(Integer.parseInt(mode, 8), remotePath);
+		} catch (JSchException | SftpException ex) {
 			Logger.getLogger(ScpClientUtil.class.getName()).log(Level.SEVERE, null, ex);
-		}finally{
-			conn.close();
+		} finally {
+			closeQuietly(sftp, session);
+		}
+	}
+
+	private Session createSession() throws JSchException {
+		JSch jsch = new JSch();
+		Session session = jsch.getSession(username, ip, port);
+		session.setPassword(password);
+		Properties config = new Properties();
+		config.put("StrictHostKeyChecking", "no");
+		session.setConfig(config);
+		session.connect();
+		return session;
+	}
+
+	private void closeQuietly(ChannelSftp sftp, Session session) {
+		if (sftp != null && sftp.isConnected()) {
+			sftp.disconnect();
+		}
+		if (session != null && session.isConnected()) {
+			session.disconnect();
 		}
 	}
 }

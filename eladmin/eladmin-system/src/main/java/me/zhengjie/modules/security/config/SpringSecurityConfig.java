@@ -20,26 +20,36 @@ import me.zhengjie.modules.security.security.*;
 import me.zhengjie.modules.security.service.OnlineUserService;
 import me.zhengjie.utils.AnonTagUtils;
 import me.zhengjie.utils.enums.RequestMethodEnum;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
-import java.util.*;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
+ * Spring Security 6（Spring Boot 3.3）配置：
+ *  - antMatchers → requestMatchers
+ *  - 取消 .and() 链式，改为 lambda DSL
+ *  - @EnableGlobalMethodSecurity 已替换为 @EnableMethodSecurity
+ *
  * @author Zheng Jie
  */
 @Configuration
 @RequiredArgsConstructor
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SpringSecurityConfig {
 
     private final TokenProvider tokenProvider;
@@ -66,66 +76,64 @@ public class SpringSecurityConfig {
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         // 获取匿名标记
         Map<String, Set<String>> anonymousUrls = AnonTagUtils.getAnonymousUrl(applicationContext);
-        return httpSecurity
+
+        httpSecurity
                 // 禁用 CSRF
-                .csrf().disable()
+                .csrf(AbstractHttpConfigurer::disable)
                 .addFilter(corsFilter)
                 // 授权异常
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationErrorHandler)
-                .accessDeniedHandler(jwtAccessDeniedHandler)
-                // 防止iframe 造成跨域
-                .and()
-                .headers()
-                .frameOptions()
-                .disable()
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint(authenticationErrorHandler)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
+                // 防止 iframe 造成跨域
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 // 不创建会话
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                // 静态资源等等
-                .antMatchers(
-                        HttpMethod.GET,
-                        "/*.html",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js",
-                        "/webSocket/**"
-                ).permitAll()
-                // swagger 文档
-                .antMatchers("/swagger-ui.html").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/webjars/**").permitAll()
-                .antMatchers("/*/api-docs").permitAll()
-                // 文件
-                .antMatchers("/avatar/**").permitAll()
-                .antMatchers("/file/**").permitAll()
-                // 阿里巴巴 druid
-                .antMatchers("/druid/**").permitAll()
-                // 放行OPTIONS请求
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 自定义匿名访问所有url放行：允许匿名和带Token访问，细腻化到每个 Request 类型
-                // GET
-                .antMatchers(HttpMethod.GET, anonymousUrls.get(RequestMethodEnum.GET.getType()).toArray(new String[0])).permitAll()
-                // POST
-                .antMatchers(HttpMethod.POST, anonymousUrls.get(RequestMethodEnum.POST.getType()).toArray(new String[0])).permitAll()
-                // PUT
-                .antMatchers(HttpMethod.PUT, anonymousUrls.get(RequestMethodEnum.PUT.getType()).toArray(new String[0])).permitAll()
-                // PATCH
-                .antMatchers(HttpMethod.PATCH, anonymousUrls.get(RequestMethodEnum.PATCH.getType()).toArray(new String[0])).permitAll()
-                // DELETE
-                .antMatchers(HttpMethod.DELETE, anonymousUrls.get(RequestMethodEnum.DELETE.getType()).toArray(new String[0])).permitAll()
-                // 所有类型的接口都放行
-                .antMatchers(anonymousUrls.get(RequestMethodEnum.ALL.getType()).toArray(new String[0])).permitAll()
-                // 所有请求都需要认证
-                .anyRequest().authenticated()
-                .and().apply(securityConfigurerAdapter())
-                .and().build();
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Spring Boot 默认静态资源（/css/**、/js/**、/images/**、/webjars/**、favicon 等）
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        // 顶层 html 与 webSocket 直连
+                        .requestMatchers(HttpMethod.GET,
+                                "/*.html",
+                                "/webSocket/**"
+                        ).permitAll()
+                        // Knife4j / OpenAPI 3 文档
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/swagger-resources/**",
+                                "/v3/api-docs/**",
+                                "/webjars/**",
+                                "/doc.html",
+                                "/favicon.ico"
+                        ).permitAll()
+                        // 文件
+                        .requestMatchers("/avatar/**", "/file/**").permitAll()
+                        // 阿里巴巴 druid
+                        .requestMatchers("/druid/**").permitAll()
+                        // 放行 OPTIONS 请求
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 自定义匿名访问 URL：分别按请求方法放行
+                        .requestMatchers(HttpMethod.GET, toArray(anonymousUrls, RequestMethodEnum.GET)).permitAll()
+                        .requestMatchers(HttpMethod.POST, toArray(anonymousUrls, RequestMethodEnum.POST)).permitAll()
+                        .requestMatchers(HttpMethod.PUT, toArray(anonymousUrls, RequestMethodEnum.PUT)).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, toArray(anonymousUrls, RequestMethodEnum.PATCH)).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, toArray(anonymousUrls, RequestMethodEnum.DELETE)).permitAll()
+                        // 所有类型的接口都放行
+                        .requestMatchers(toArray(anonymousUrls, RequestMethodEnum.ALL)).permitAll()
+                        // 所有请求都需要认证
+                        .anyRequest().authenticated())
+                .with(securityConfigurerAdapter(), Customizer.withDefaults());
+
+        return httpSecurity.build();
     }
 
     private TokenConfigurer securityConfigurerAdapter() {
         return new TokenConfigurer(tokenProvider, properties, onlineUserService);
+    }
+
+    private static String[] toArray(Map<String, Set<String>> anonymousUrls, RequestMethodEnum method) {
+        Set<String> urls = anonymousUrls.get(method.getType());
+        return urls == null ? new String[0] : urls.toArray(new String[0]);
     }
 }

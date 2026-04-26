@@ -15,9 +15,14 @@
  */
 package me.zhengjie.utils;
 
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.URL;
 
 /**
  * sql字段转java
@@ -41,11 +46,16 @@ public class ColUtil {
     }
 
     /**
-     * 获取配置信息
+     * 获取配置信息（从 classpath 读取 gen.properties）
      */
     public static PropertiesConfiguration getConfig() {
         try {
-            return new PropertiesConfiguration("gen.properties");
+            URL url = ColUtil.class.getClassLoader().getResource("gen.properties");
+            if (url == null) {
+                log.error("gen.properties not found on classpath");
+                return null;
+            }
+            return new Configurations().properties(url);
         } catch (ConfigurationException e) {
             log.error(e.getMessage(), e);
         }

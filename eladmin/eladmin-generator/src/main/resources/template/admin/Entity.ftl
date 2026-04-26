@@ -17,7 +17,7 @@ package ${package}.domain;
 
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import cn.hutool.core.bean.copier.CopyOptions;
 <#if hasTimestamp>
 import java.sql.Timestamp;
@@ -39,10 +39,10 @@ import java.math.BigDecimal;
     </#list>
 </#if>
 <#if notBlankUsed>
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 </#if>
 <#if notNullUsed>
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 </#if>
 import java.io.Serializable;
 <#if auto>
@@ -73,9 +73,9 @@ public class ${className} implements Serializable {
         </#if>
     </#if>
     <#if column.remark != ''>
-    @ApiModelProperty(value = "${column.remark}")
+    @Schema(description = "${column.remark}")
     <#else>
-    @ApiModelProperty(value = "${column.changeColumnName}")
+    @Schema(description = "${column.changeColumnName}")
     </#if>
     private ${column.columnType} ${column.changeColumnName};
     </#list>

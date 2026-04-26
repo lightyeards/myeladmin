@@ -22,7 +22,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import me.zhengjie.base.BaseEntity;
@@ -42,18 +42,18 @@ import java.util.stream.Collectors;
 public class Deploy extends BaseEntity implements Serializable {
 
 	@TableId(value = "deploy_id", type = IdType.AUTO)
-	@ApiModelProperty(value = "ID", hidden = true)
+	@Schema(description = "ID", hidden = true)
     private Long id;
 
-	@ApiModelProperty(value = "应用编号")
+	@Schema(description = "应用编号")
 	private Long appId;
 
 	@TableField(exist = false)
-	@ApiModelProperty(name = "服务器", hidden = true)
+	@Schema(name = "服务器", hidden = true)
 	private Set<Server> deploys;
 
 	@TableField(exist = false)
-	@ApiModelProperty(value = "应用")
+	@Schema(description = "应用")
     private App app;
 
     public void copy(Deploy source){
