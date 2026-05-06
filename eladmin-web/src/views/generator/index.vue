@@ -3,7 +3,7 @@
     <!--工具栏-->
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
-        <el-input v-model="query.name" clearable size="small" placeholder="请输入表名" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+        <el-input v-model="query.name" clearable placeholder="请输入表名" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <rrOperation />
       </div>
       <crudOperation>
@@ -11,8 +11,7 @@
           <el-tooltip class="item" effect="dark" content="数据库中表字段变动时使用该功能" placement="top-start">
             <el-button
               class="filter-item"
-              size="small"
-              type="success"
+                           type="success"
               :icon="Refresh"
               :loading="syncLoading"
               :disabled="crud.selections.length === 0"
@@ -30,20 +29,20 @@
       <el-table-column :show-overflow-tooltip="true" prop="coding" label="字符编码集" />
       <el-table-column :show-overflow-tooltip="true" prop="remark" label="备注" />
       <el-table-column prop="createTime" label="创建日期" />
-      <el-table-column label="操作" width="160px" align="center" fixed="right">
+      <el-table-column label="操作" width="230px" align="center" fixed="right">
         <template #default="scope">
-          <el-button size="small" style="margin-right: 2px" text>
+          <el-button link type="primary" size="small">
             <router-link :to="'/sys-tools/generator/preview/' + scope.row.tableName">
               预览
             </router-link>
           </el-button>
-          <el-button size="small" style="margin-left: -1px;margin-right: 2px" text @click="toDownload(scope.row.tableName)">下载</el-button>
-          <el-button size="small" style="margin-left: -1px;margin-right: 2px" text>
+          <el-button link type="success" size="small" @click="toDownload(scope.row.tableName)">下载</el-button>
+          <el-button link type="warning" size="small">
             <router-link :to="'/sys-tools/generator/config/' + scope.row.tableName">
               配置
             </router-link>
           </el-button>
-          <el-button text style="margin-left: -1px" size="small" @click="toGen(scope.row.tableName)">生成</el-button>
+          <el-button link type="info" size="small" @click="toGen(scope.row.tableName)">生成</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -53,6 +52,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
 import { generator, sync } from '@/api/generator/generator'
@@ -71,6 +71,7 @@ export default {
   mixins: [presenter(), header()],
   data() {
     return {
+      Refresh: markRaw(Refresh),
       syncLoading: false
     }
   },

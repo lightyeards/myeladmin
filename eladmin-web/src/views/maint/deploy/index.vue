@@ -14,8 +14,7 @@
             v-permission="['admin','deploy:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="primary"
+                       type="primary"
             :icon="Upload"
             @click="sysRestore"
           >系统还原
@@ -24,8 +23,7 @@
             v-permission="['admin','deploy:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="primary"
+                       type="primary"
             :icon="Upload"
             @click="serverStatus"
           >状态查询
@@ -34,8 +32,7 @@
             v-permission="['admin','deploy:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="success"
+                       type="success"
             :icon="Upload"
             @click="startServer"
           >启动
@@ -44,8 +41,7 @@
             v-permission="['admin','deploy:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="danger"
+                       type="danger"
             :icon="Upload"
             @click="stopServer"
           >停止
@@ -54,8 +50,7 @@
             v-permission="['admin','deploy:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="warning"
+                       type="warning"
             :icon="Upload"
             @click="deploy"
           >一键部署
@@ -64,8 +59,8 @@
       </crudOperation>
     </div>
     <!--表单组件-->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
-      <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="580px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="应用" prop="app.id">
           <el-select v-model.number="form.app.id" placeholder="请选择" style="width: 370px">
             <el-option v-for="item in apps" :key="item.id" :label="item.name" :value="item.id" />
@@ -108,6 +103,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Upload } from '@element-plus/icons-vue'
 import crudDeploy from '@/api/maint/deploy'
 import dForm from './deploy.vue'
@@ -129,6 +125,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+      Upload: markRaw(Upload),
       currentRow: {}, selectIndex: '', appName: '', urlHistory: '',
       times: 0, appId: '', deployId: '', apps: [], servers: [],
       permission: {

@@ -4,7 +4,7 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.jobName" clearable size="small" placeholder="输入任务名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="toQuery" />
+        <el-input v-model="query.jobName" clearable placeholder="输入任务名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
@@ -13,8 +13,7 @@
         <template #right>
           <el-button
             class="filter-item"
-            size="small"
-            type="info"
+                       type="info"
             :icon="Tickets"
             @click="doLog"
           >日志</el-button>
@@ -23,47 +22,81 @@
       <Log ref="log" />
     </div>
     <!--Form表单-->
-    <el-dialog v-model="cuVisible" :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" append-to-body width="730px">
-      <el-form ref="form" :inline="true" :model="form" :rules="rules" size="small" label-width="100px">
-        <el-form-item label="任务名称" prop="jobName">
-          <el-input v-model="form.jobName" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="任务描述" prop="description">
-          <el-input v-model="form.description" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="Bean名称" prop="beanName">
-          <el-input v-model="form.beanName" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="执行方法" prop="methodName">
-          <el-input v-model="form.methodName" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="Cron表达式" prop="cronExpression">
-          <el-input v-model="form.cronExpression" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="子任务ID">
-          <el-input v-model="form.subTask" placeholder="多个用逗号隔开，按顺序执行" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="任务负责人" prop="personInCharge">
-          <el-input v-model="form.personInCharge" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="告警邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="多个邮箱用逗号隔开" style="width: 220px;" />
-        </el-form-item>
-        <el-form-item label="失败后暂停">
-          <el-radio-group v-model="form.pauseAfterFailure" style="width: 220px">
-            <el-radio :label="true">是</el-radio>
-            <el-radio :label="false">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="任务状态">
-          <el-radio-group v-model="form.isPause" style="width: 220px">
-            <el-radio :label="false">启用</el-radio>
-            <el-radio :label="true">暂停</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="参数内容">
-          <el-input v-model="form.params" style="width: 556px;" rows="4" type="textarea" />
-        </el-form-item>
+    <el-dialog v-model="cuVisible" :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" append-to-body width="720px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="任务名称" prop="jobName">
+              <el-input v-model="form.jobName" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="任务描述" prop="description">
+              <el-input v-model="form.description" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Bean名称" prop="beanName">
+              <el-input v-model="form.beanName" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="执行方法" prop="methodName">
+              <el-input v-model="form.methodName" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Cron表达式" prop="cronExpression">
+              <el-input v-model="form.cronExpression" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="子任务ID">
+              <el-input v-model="form.subTask" placeholder="多个用逗号隔开，按顺序执行" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="任务负责人" prop="personInCharge">
+              <el-input v-model="form.personInCharge" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="告警邮箱" prop="email">
+              <el-input v-model="form.email" placeholder="多个邮箱用逗号隔开" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="失败后暂停">
+              <el-radio-group v-model="form.pauseAfterFailure">
+                <el-radio :value="true">是</el-radio>
+                <el-radio :value="false">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="任务状态">
+              <el-radio-group v-model="form.isPause">
+                <el-radio :value="false">启用</el-radio>
+                <el-radio :value="true">暂停</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="参数内容">
+              <el-input v-model="form.params" rows="4" type="textarea" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -88,28 +121,30 @@
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" prop="description" width="150px" label="描述" />
       <el-table-column :show-overflow-tooltip="true" prop="createTime" width="136px" label="创建日期" />
-      <el-table-column v-if="checkPer(['admin','timing:edit','timing:del'])" label="操作" width="170px" align="center" fixed="right">
+      <el-table-column v-if="checkPer(['admin','timing:edit','timing:del'])" label="操作" width="230px" align="center" fixed="right">
         <template #default="scope">
-          <el-button v-permission="['admin','timing:edit']" size="small" style="margin-right: 3px;" text @click="crud.toEdit(scope.row)">编辑</el-button>
-          <el-button v-permission="['admin','timing:edit']" style="margin-left: -2px" text size="small" @click="execute(scope.row.id)">执行</el-button>
-          <el-button v-permission="['admin','timing:edit']" style="margin-left: 3px" text size="small" @click="updateStatus(scope.row.id,scope.row.isPause ? '恢复' : '暂停')">
+          <el-button v-permission="['admin','timing:edit']" link type="primary" size="small" @click="crud.toEdit(scope.row)">编辑</el-button>
+          <el-button v-permission="['admin','timing:edit']" link type="success" size="small" @click="execute(scope.row.id)">执行</el-button>
+          <el-button v-permission="['admin','timing:edit']" link :type="scope.row.isPause ? 'warning' : 'info'" size="small" @click="updateStatus(scope.row.id,scope.row.isPause ? '恢复' : '暂停')">
             {{ scope.row.isPause ? '恢复' : '暂停' }}
           </el-button>
-          <el-popover
-            :ref="scope.row.id"
-            v-permission="['admin','timing:del']"
-            placement="top"
-            width="200"
-          >
-            <template #reference>
-              <el-button text size="small">删除</el-button>
-            </template>
-            <p>确定停止并删除该任务吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="small" text @click="$refs[scope.row.id].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.id)">确定</el-button>
+          <span v-permission="['admin','timing:del']">
+            <el-popover
+              :ref="scope.row.id"
+              placement="top"
+              width="200"
+              trigger="click"
+            >
+              <template #reference>
+                <el-button link type="danger" size="small">删除</el-button>
+              </template>
+              <p>确定停止并删除该任务吗？</p>
+              <div style="text-align: right; margin: 0">
+                <el-button text size="small" @click="$refs[scope.row.id].doClose()">取消</el-button>
+                <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.id)">确定</el-button>
             </div>
           </el-popover>
+          </span>
         </template>
       </el-table-column>
     </el-table>
@@ -119,6 +154,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Tickets } from '@element-plus/icons-vue'
 import crudJob from '@/api/system/timing'
 import Log from './log.vue'
@@ -138,7 +174,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
-      Tickets,
+      Tickets: markRaw(Tickets),
       delLoading: false,
       permission: {
         add: ['admin', 'timing:add'],

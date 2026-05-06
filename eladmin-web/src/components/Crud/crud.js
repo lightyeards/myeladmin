@@ -134,8 +134,18 @@ function CRUD(options) {
           const table = crud.getTable()
           if (table && table.lazy) { // 懒加载子节点数据，清掉已加载的数据
             if (table.store && table.store.states) {
-              table.store.states.treeData = {}
-              table.store.states.lazyTreeNodeMap = {}
+              const states = table.store.states
+              // Element Plus 2.x (Vue 3) 中 treeData / lazyTreeNodeMap 是 ref，需通过 .value 修改
+              const clearState = (key) => {
+                const state = states[key]
+                if (state && typeof state === 'object' && 'value' in state) {
+                  state.value = {}
+                } else {
+                  states[key] = {}
+                }
+              }
+              clearState('treeData')
+              clearState('lazyTreeNodeMap')
             }
           }
           crud.page.total = data.totalElements
@@ -441,6 +451,12 @@ function CRUD(options) {
      * @param {Number | String} id 数据项id
      */
     getDataStatus(id) {
+      if (crud.dataStatus[id] === undefined) {
+        crud.dataStatus[id] = {
+          delete: CRUD.STATUS.NORMAL,
+          edit: CRUD.STATUS.NORMAL
+        }
+      }
       return crud.dataStatus[id]
     },
     /**

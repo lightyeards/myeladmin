@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="应用部署" width="400px">
-    <el-form ref="form" :model="form" :rules="rules" size="small">
+    <el-form ref="form" :model="form" :rules="rules">
       <el-upload
         :action="deployUploadApi"
         :data="deployInfo"

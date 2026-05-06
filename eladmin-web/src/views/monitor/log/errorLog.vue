@@ -8,8 +8,7 @@
             class="filter-item"
             type="danger"
             :icon="Delete"
-            size="small"
-            :loading="crud.delAllLoading"
+                       :loading="crud.delAllLoading"
             @click="confirmDelAll()"
           >
             清空
@@ -39,12 +38,12 @@
       <el-table-column prop="createTime" label="创建日期" />
       <el-table-column label="异常详情" width="100px">
         <template #default="scope">
-          <el-button size="small" text @click="info(scope.row.id)">查看详情</el-button>
+          <el-button link type="primary" size="small" @click="info(scope.row.id)">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog v-model="dialog" title="异常详情" append-to-body top="30px" width="85%">
-      <pre>{{ errorInfo }}</pre>
+    <el-dialog v-model="dialog" title="异常详情" append-to-body top="30px" width="70%">
+      <pre style="max-height: 600px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;">{{ errorInfo }}</pre>
     </el-dialog>
     <!--分页组件-->
     <pagination />
@@ -52,6 +51,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { getErrDetail, delAllError } from '@/api/monitor/log'
@@ -69,7 +69,7 @@ export default {
   mixins: [presenter()],
   data() {
     return {
-      Delete,
+      Delete: markRaw(Delete),
       errorInfo: '', dialog: false
     }
   },

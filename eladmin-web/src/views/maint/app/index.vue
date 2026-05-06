@@ -14,8 +14,7 @@
             v-permission="['admin','app:add']"
             :disabled="!currentRow"
             class="filter-item"
-            size="small"
-            type="primary"
+                       type="primary"
             :icon="Plus"
             @click="copy"
           >复制</el-button>
@@ -23,29 +22,53 @@
       </crudOperation>
     </div>
     <!--表单组件-->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="800px">
-      <el-form ref="form" :model="form" :rules="rules" size="small" label-width="100px">
-        <el-form-item label="应用名称" prop="name">
-          <el-input v-model="form.name" style="width: 670px" placeholder="部署后的文件或者目录名称，用于备份" />
-        </el-form-item>
-        <el-form-item label="应用端口" prop="port">
-          <el-input-number v-model.number="form.port" placeholder="例如：8080" />
-        </el-form-item>
-        <el-form-item label="上传目录" prop="uploadPath">
-          <el-input v-model="form.uploadPath" style="width: 670px" placeholder="例如: /opt/upload" />
-        </el-form-item>
-        <el-form-item label="部署目录" prop="deployPath">
-          <el-input v-model="form.deployPath" style="width: 670px" placeholder="例如: /opt/app" />
-        </el-form-item>
-        <el-form-item label="备份目录" prop="backupPath">
-          <el-input v-model="form.backupPath" style="width: 670px" placeholder="例如: /opt/backup" />
-        </el-form-item>
-        <el-form-item label="部署脚本" prop="deployScript">
-          <el-input v-model="form.deployScript" :rows="3" type="textarea" autosize style="width: 670px" placeholder="" />
-        </el-form-item>
-        <el-form-item label="启动脚本" prop="startScript">
-          <el-input v-model="form.startScript" :rows="3" type="textarea" autosize style="width: 670px" placeholder="" />
-        </el-form-item>
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="720px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="应用名称" prop="name">
+              <el-input v-model="form.name" placeholder="部署后的文件或者目录名称，用于备份" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="应用端口" prop="port">
+              <el-input-number v-model.number="form.port" placeholder="例如：8080" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="上传目录" prop="uploadPath">
+              <el-input v-model="form.uploadPath" placeholder="例如: /opt/upload" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="部署目录" prop="deployPath">
+              <el-input v-model="form.deployPath" placeholder="例如: /opt/app" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="备份目录" prop="backupPath">
+              <el-input v-model="form.backupPath" placeholder="例如: /opt/backup" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="部署脚本" prop="deployScript">
+              <el-input v-model="form.deployScript" :rows="3" type="textarea" autosize placeholder="" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="启动脚本" prop="startScript">
+              <el-input v-model="form.startScript" :rows="3" type="textarea" autosize placeholder="" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -78,6 +101,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import crudApp from '@/api/maint/app'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
@@ -97,6 +121,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+      Plus: markRaw(Plus),
       currentRow: null,
       permission: {
         add: ['admin', 'app:add'],

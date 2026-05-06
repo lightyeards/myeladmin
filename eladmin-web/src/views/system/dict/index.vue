@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <!--表单组件-->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
-      <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="字典名称" prop="name">
           <el-input v-model="form.name" style="width: 370px;" />
         </el-form-item>
@@ -25,7 +25,7 @@
           <div class="head-container">
             <div v-if="crud.props.searchToggle">
               <!-- 搜索 -->
-              <el-input v-model="query.blurry" clearable size="small" placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+              <el-input v-model="query.blurry" clearable placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
               <rrOperation />
             </div>
             <crudOperation :permission="permission" />
@@ -57,8 +57,7 @@
               <el-button
                 v-if="checkPer(['admin','dict:add']) && $refs.dictDetail && $refs.dictDetail.query.dictName"
                 class="filter-item"
-                size="small"
-                style="float: right;padding: 4px 10px"
+                               style="float: right;padding: 4px 10px"
                 type="primary"
                 :icon="Plus"
                 @click="$refs.dictDetail && $refs.dictDetail.crud.toAdd()"
@@ -73,6 +72,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import dictDetail from './dictDetail.vue'
 import crudDict from '@/api/system/dict'
@@ -95,6 +95,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm)],
   data() {
     return {
+      Plus: markRaw(Plus),
       queryTypeOptions: [
         { key: 'name', display_name: '字典名称' },
         { key: 'description', display_name: '描述' }

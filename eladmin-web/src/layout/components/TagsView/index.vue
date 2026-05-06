@@ -271,9 +271,13 @@ export default {
     .tags-view-item-close {
       width: 16px;
       height: 16px;
-      vertical-align: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      position: relative;
+      top: -2px;
       border-radius: 50%;
-      text-align: center;
       transition: all .3s cubic-bezier(.645, .045, .355, 1);
       transform-origin: 100% 50%;
       &:hover {

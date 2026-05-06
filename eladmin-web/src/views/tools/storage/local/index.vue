@@ -4,7 +4,7 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.blurry" clearable size="small" placeholder="输入内容模糊搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+        <el-input v-model="query.blurry" clearable placeholder="输入内容模糊搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
@@ -14,8 +14,7 @@
           <el-button
             v-permission="['admin','storage:add']"
             class="filter-item"
-            size="small"
-            type="primary"
+                       type="primary"
             :icon="Upload"
             @click="crud.toAdd"
           >上传
@@ -24,8 +23,8 @@
       </crudOperation>
     </div>
     <!--表单组件-->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.add ? '文件上传' : '编辑文件'" width="500px">
-      <el-form ref="form" :model="form" size="small" label-width="80px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.add ? '文件上传' : '编辑文件'" width="520px">
+      <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="文件名">
           <el-input v-model="form.name" style="width: 370px;" />
         </el-form-item>
@@ -109,6 +108,7 @@
 
 <script>
 import { mapState } from 'pinia'
+import { markRaw } from 'vue'
 import { Upload, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElNotification } from 'element-plus'
 import { useApiStore } from '@/store'
@@ -129,6 +129,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+      Upload: markRaw(Upload),
       delAllLoading: false,
       loading: false,
       headers: { 'Authorization': getToken() },

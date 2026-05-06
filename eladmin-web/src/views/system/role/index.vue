@@ -4,46 +4,64 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.blurry" size="small" clearable placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+        <el-input v-model="query.blurry" clearable placeholder="输入名称或者描述搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
       <crudOperation :permission="permission" />
     </div>
     <!-- 表单渲染 -->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
-      <el-form ref="form" :inline="true" :model="form" :rules="rules" size="small" label-width="80px">
-        <el-form-item label="角色名称" prop="name">
-          <el-input v-model="form.name" style="width: 380px;" />
-        </el-form-item>
-        <el-form-item label="角色级别" prop="level">
-          <el-input-number v-model.number="form.level" :min="1" controls-position="right" style="width: 145px;" />
-        </el-form-item>
-        <el-form-item label="数据范围" prop="dataScope">
-          <el-select v-model="form.dataScope" style="width: 140px" placeholder="请选择数据范围" @change="changeScope">
-            <el-option
-              v-for="item in dateScopes"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="form.dataScope === '自定义'" label="数据权限" prop="depts">
-          <el-tree-select
-            v-model="deptDatas"
-            :data="depts"
-            :props="treeSelectProps"
-            multiple
-            check-strictly
-            :render-after-expand="false"
-            style="width: 380px"
-            placeholder="请选择"
-          />
-        </el-form-item>
-        <el-form-item label="描述信息" prop="description">
-          <el-input v-model="form.description" style="width: 380px;" rows="5" type="textarea" />
-        </el-form-item>
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="600px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="角色名称" prop="name">
+              <el-input v-model="form.name" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="角色级别" prop="level">
+              <el-input-number v-model.number="form.level" :min="1" controls-position="right" style="width: 100%;" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="数据范围" prop="dataScope">
+              <el-select v-model="form.dataScope" style="width: 100%;" placeholder="请选择数据范围" @change="changeScope">
+                <el-option
+                  v-for="item in dateScopes"
+                  :key="item"
+                  :label="item"
+                  :value="item"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row v-if="form.dataScope === '自定义'" :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="数据权限" prop="depts">
+              <el-tree-select
+                v-model="deptDatas"
+                :data="depts"
+                :props="treeSelectProps"
+                multiple
+                check-strictly
+                :render-after-expand="false"
+                style="width: 100%;"
+                placeholder="请选择"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-form-item label="描述信息" prop="description">
+              <el-input v-model="form.description" rows="5" type="textarea" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -99,8 +117,7 @@
                 :disabled="!showButton"
                 :loading="menuLoading"
                 :icon="Check"
-                size="small"
-                style="float: right; padding: 6px 9px"
+                               style="float: right; padding: 6px 9px"
                 type="primary"
                 @click="saveMenu"
               >保存</el-button>
@@ -126,6 +143,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Check } from '@element-plus/icons-vue'
 import crudRoles from '@/api/system/role'
@@ -148,7 +166,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
-      Check,
+      Check: markRaw(Check),
       defaultProps: { children: 'children', label: 'label', isLeaf: 'leaf' },
       treeSelectProps: { label: 'name', value: 'id', children: 'children' },
       dateScopes: ['全部', '本级', '自定义'], level: 3,

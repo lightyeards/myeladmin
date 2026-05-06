@@ -13,7 +13,9 @@
       </right-panel>
     </div>
     <!--  防止刷新后主题丢失  -->
-    <Theme v-show="false" ref="theme" />
+    <div style="display: none">
+      <Theme ref="theme" />
+    </div>
   </div>
 </template>
 

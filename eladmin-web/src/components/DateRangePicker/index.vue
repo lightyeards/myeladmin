@@ -3,10 +3,8 @@
     v-model="val"
     :type="type"
     :value-format="valueFormat"
-    :default-time="defaultTime"
-    :shortcuts="shortcuts"
     :first-day-of-week="1"
-    :size="size"
+    :shortcuts="shortcuts"
     :range-separator="rangeSeparator"
     :start-placeholder="startPlaceholder"
     :end-placeholder="endPlaceholder"
@@ -21,9 +19,7 @@ export default {
   props: {
     modelValue: { type: [String, Array, Date], default: null },
     type: { type: String, default: 'daterange' },
-    valueFormat: { type: String, default: 'yyyy-MM-dd HH:mm:ss' },
-    defaultTime: { type: Array, default: () => ['00:00:00', '23:59:59'] },
-    size: { type: String, default: 'small' },
+    valueFormat: { type: String, default: 'YYYY-MM-DD HH:mm:ss' },
     rangeSeparator: { type: String, default: ':' },
     startPlaceholder: { type: String, default: '开始日期' },
     endPlaceholder: { type: String, default: '结束日期' }

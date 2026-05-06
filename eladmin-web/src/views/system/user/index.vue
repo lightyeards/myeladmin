@@ -7,8 +7,7 @@
           <el-input
             v-model="deptName"
             clearable
-            size="small"
-            placeholder="输入部门名称搜索"
+                       placeholder="输入部门名称搜索"
             :prefix-icon="Search"
             class="filter-item"
             @input="getDeptDatas"
@@ -32,8 +31,7 @@
             <el-input
               v-model="query.blurry"
               clearable
-              size="small"
-              placeholder="输入名称或者邮箱搜索"
+                           placeholder="输入名称或者邮箱搜索"
               style="width: 200px;"
               class="filter-item"
               @keyup.enter="crud.toQuery"
@@ -42,8 +40,7 @@
             <el-select
               v-model="query.enabled"
               clearable
-              size="small"
-              placeholder="状态"
+                           placeholder="状态"
               class="filter-item"
               style="width: 90px"
               @change="crud.toQuery"
@@ -63,8 +60,7 @@
                 v-permission="['admin','user:add']"
                 :disabled="crud.selections.length === 0"
                 class="filter-item"
-                size="small"
-                type="primary"
+                               type="primary"
                 :icon="RefreshLeft"
                 @click="resetPwd(crud.selections)"
               >重置密码
@@ -79,83 +75,108 @@
           :close-on-click-modal="false"
           :before-close="crud.cancelCU"
           :title="crud.status.title"
-          width="555px"
+          width="600px"
         >
-          <el-form ref="form" :inline="true" :model="form" :rules="rules" size="small" label-width="66px">
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="form.username" @keydown="keydown($event)" />
-            </el-form-item>
-            <el-form-item label="电话" prop="phone">
-              <el-input v-model.number="form.phone" />
-            </el-form-item>
-            <el-form-item label="昵称" prop="nickName">
-              <el-input v-model="form.nickName" @keydown="keydown($event)" />
-            </el-form-item>
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="form.email" />
-            </el-form-item>
-            <el-form-item label="部门" prop="dept.id">
-              <el-tree-select
-                v-model="form.dept.id"
-                :data="depts"
-                :props="treeSelectProps"
-                check-strictly
-                :render-after-expand="false"
-                style="width: 173px"
-                placeholder="选择部门"
-              />
-            </el-form-item>
-            <el-form-item label="岗位" prop="jobDatas" class="is-required">
-              <el-select
-                v-model="jobDatas"
-                style="width: 172px"
-                multiple
-                placeholder="请选择"
-                @remove-tag="deleteTag"
-                @change="changeJob"
-              >
-                <el-option
-                  v-for="item in jobs"
-                  :key="item.name"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="性别">
-              <el-radio-group v-model="form.gender" style="width: 178px">
-                <el-radio label="男">男</el-radio>
-                <el-radio label="女">女</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.enabled" :disabled="form.id === user.id">
-                <el-radio
-                  v-for="item in dict.user_status"
-                  :key="item.id"
-                  :label="item.value"
-                >{{ item.label }}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item style="margin-bottom: 0;" label="角色" prop="roleDatas" class="is-required">
-              <el-select
-                v-model="roleDatas"
-                :disabled="form.id === user.id"
-                style="width: 426px"
-                multiple
-                placeholder="请选择"
-                @remove-tag="deleteTag"
-                @change="changeRole"
-              >
-                <el-option
-                  v-for="item in roles"
-                  :key="item.name"
-                  :disabled="level !== 1 && item.level <= level"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
+          <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="用户名" prop="username">
+                  <el-input v-model="form.username" @keydown="keydown($event)" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="电话" prop="phone">
+                  <el-input v-model.number="form.phone" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="昵称" prop="nickName">
+                  <el-input v-model="form.nickName" @keydown="keydown($event)" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="邮箱" prop="email">
+                  <el-input v-model="form.email" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="部门" prop="dept.id">
+                  <el-tree-select
+                    v-model="form.dept.id"
+                    :data="depts"
+                    :props="treeSelectProps"
+                    check-strictly
+                    :render-after-expand="false"
+                    placeholder="选择部门"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="岗位" prop="jobDatas" class="is-required">
+                  <el-select
+                    v-model="jobDatas"
+                    multiple
+                    placeholder="请选择"
+                    @remove-tag="deleteTag"
+                    @change="changeJob"
+                  >
+                    <el-option
+                      v-for="item in jobs"
+                      :key="item.name"
+                      :label="item.name"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="性别">
+                  <el-radio-group v-model="form.gender">
+                    <el-radio value="男">男</el-radio>
+                    <el-radio value="女">女</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="状态">
+                  <el-radio-group v-model="form.enabled" :disabled="form.id === user.id">
+                    <el-radio
+                      v-for="item in dict.user_status"
+                      :key="item.id"
+                      :value="item.value"
+                    >{{ item.label }}</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item style="margin-bottom: 0;" label="角色" prop="roleDatas" class="is-required">
+                  <el-select
+                    v-model="roleDatas"
+                    :disabled="form.id === user.id"
+                    multiple
+                    placeholder="请选择"
+                    @remove-tag="deleteTag"
+                    @change="changeRole"
+                  >
+                    <el-option
+                      v-for="item in roles"
+                      :key="item.name"
+                      :disabled="level !== 1 && item.level <= level"
+                      :label="item.name"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </el-form>
           <template #footer>
             <div class="dialog-footer">
@@ -192,7 +213,7 @@
           <el-table-column
             v-if="checkPer(['admin','user:edit','user:del'])"
             label="操作"
-            width="115"
+            width="130"
             align="center"
             fixed="right"
           >
@@ -213,6 +234,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { mapState } from 'pinia'
 import { ElMessageBox } from 'element-plus'
 import { Search, RefreshLeft } from '@element-plus/icons-vue'
@@ -253,8 +275,8 @@ export default {
       }
     }
     return {
-      Search,
-      RefreshLeft,
+      Search: markRaw(Search),
+      RefreshLeft: markRaw(RefreshLeft),
       height: document.documentElement.clientHeight - 180 + 'px;',
       deptName: '', depts: [], deptDatas: [], jobs: [], level: 3, roles: [],
       jobDatas: [], roleDatas: [], // 多选时使用

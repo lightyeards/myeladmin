@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" size="small" label-width="100px">
+  <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" label-width="100px">
     <el-form-item label="发件人邮箱" prop="fromUser">
       <el-input v-model="form.fromUser" style="width: 40%" />
       <span style="color: #C0C0C0;margin-left: 10px;">Sender mailbox</span>

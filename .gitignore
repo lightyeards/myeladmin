@@ -2,3 +2,26 @@
 .idea/*
 .DS_Store
 application.pid.claude/
+
+# Node
+node_modules/
+
+# Hidden directories
+.claude/
+
+# Special files
+start-dev.sh
+
+# Logs
+*.log
+
+# Runtime PIDs
+application.pid
+.dev-pids
+vite-dev.log
+backend.log
+frontend.log
+
+# Temp files
+menu-dialog-snapshot.txt
+sidebar_collapse_check.txt

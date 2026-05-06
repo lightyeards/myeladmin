@@ -3,34 +3,82 @@
   .filter-item {
     display: inline-block;
     vertical-align: middle;
-    margin: 0 3px 10px 0;
+    margin: 0 6px 10px 0;
+    &.el-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 12px;
+      height: 28px;
+    }
+    .el-input__wrapper {
+      padding: 0 8px;
+    }
+    .el-input__inner {
+      height: 28px;
+      font-size: 12px;
+    }
     input {
-      height: 30.5px;
-      line-height: 30.5px;
+      height: 28px;
+      line-height: 28px;
+      font-size: 12px;
     }
   }
   .el-form-item-label {
-    margin: 0 3px 9px 0;
+    margin: 0 6px 9px 0;
     display: inline-block;
     text-align: right;
     vertical-align: middle;
-    font-size: 14px;
+    font-size: 12px;
     color: #606266;
-    line-height: 30.5px;
+    line-height: 28px;
     padding: 0 7px 0 7px;
   }
   .el-button+.el-button {
     margin-left: 0 !important;
   }
-  .el-select__caret.el-input__icon.el-icon-arrow-up{
-    line-height: 30.5px;
+  .el-select__caret.el-input__icon.el-icon-arrow-up {
+    line-height: 28px;
+  }
+  .el-select .el-input__inner {
+    height: 28px;
+    font-size: 12px;
+  }
+  .el-select .el-select__wrapper {
+    height: 28px;
+    min-height: 28px;
+    font-size: 12px;
+  }
+  .el-select .el-select__placeholder {
+    font-size: 12px;
+  }
+  .el-select .el-select__selected-item {
+    font-size: 12px;
   }
   .date-item {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     vertical-align: middle;
-    margin-bottom: 10px;
-    height: 30.5px !important;
+    margin: 0 6px 10px 0;
+    height: 28px !important;
     width: 230px !important;
+    font-size: 12px;
+  }
+  .date-item .el-range-input {
+    font-size: 12px;
+    text-align: center;
+    height: 26px !important;
+    line-height: 26px !important;
+    &::placeholder {
+      text-align: center;
+    }
+  }
+  .date-item .el-range-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 12px;
   }
 }
 .el-avatar {
@@ -114,4 +162,48 @@
 
 .el-tabs{
   margin-bottom: 25px;
+}
+
+.el-button {
+  font-size: 12px;
+  font-weight: 400;
+  height: 28px;
+}
+
+/* 工具栏按钮 */
+.head-container .el-button {
+  padding: 5px 12px;
+}
+
+/* 表格操作按钮 */
+.el-table .el-button {
+  padding: 4px 8px;
+  height: 26px;
+}
+/* link按钮中的router-link继承按钮颜色 */
+.el-table .el-button--primary a,
+.el-table .el-button--success a,
+.el-table .el-button--warning a,
+.el-table .el-button--info a,
+.el-table .el-button--danger a {
+  color: inherit;
+}
+
+/* 表格内容 */
+.el-table {
+  font-size: 12px;
+  .el-table__cell {
+    font-weight: 400;
+    padding: 6px 0;
+    .cell {
+      line-height: 20px;
+    }
+  }
+}
+
+/* 表格头部 */
+.el-table__header-wrapper .el-table__cell {
+  font-weight: 500;
+  color: #909399;
+  padding: 6px 0;
 }

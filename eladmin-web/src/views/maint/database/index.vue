@@ -14,8 +14,7 @@
             v-permission="['admin','database:add']"
             :disabled="!selectIndex"
             class="filter-item"
-            size="small"
-            type="warning"
+                       type="warning"
             :icon="Upload"
             @click="execute"
           >执行脚本
@@ -25,8 +24,8 @@
     </div>
     <!--表单组件-->
     <eForm ref="execute" :database-info="currentRow" />
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="530px">
-      <el-form ref="form" :model="form" :rules="rules" size="small" label-width="100px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="580px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="连接名称" prop="name">
           <el-input v-model="form.name" style="width: 370px" />
         </el-form-item>
@@ -70,6 +69,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Upload } from '@element-plus/icons-vue'
 import crudDatabase from '@/api/maint/database'
 import { testDbConnect } from '@/api/maint/connect'
@@ -91,6 +91,7 @@ export default {
   mixins: [presenter(), header(), form(defaultForm), crud()],
   data() {
     return {
+      Upload: markRaw(Upload),
       currentRow: {},
       selectIndex: '',
       databaseInfo: '',

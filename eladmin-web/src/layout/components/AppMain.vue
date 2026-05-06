@@ -1,10 +1,12 @@
 <template>
   <section class="app-main">
-    <transition name="fade-transform" mode="out-in">
-      <keep-alive :include="cachedViews">
-        <router-view :key="key" />
-      </keep-alive>
-    </transition>
+    <router-view v-slot="{ Component }">
+      <transition name="fade-transform" mode="out-in">
+        <keep-alive :include="cachedViews">
+          <component :is="Component" :key="key" />
+        </keep-alive>
+      </transition>
+    </router-view>
     <el-backtop :bottom="50" :right="40"><el-icon><caret-top /></el-icon></el-backtop>
     <div v-if="showFooter" id="el-main-footer">
       <span v-html="footerTxt" />

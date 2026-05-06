@@ -83,6 +83,15 @@ export const loadView = (view) => {
   if (alt) {
     return viewModules[alt]
   }
+  // 兼容 index.vue 目录结构，如 views/nested/menu1/menu1-1/index.vue
+  const indexTarget = `/src/views/${view}/index.vue`
+  if (viewModules[indexTarget]) {
+    return viewModules[indexTarget]
+  }
+  const altIndex = Object.keys(viewModules).find((k) => k.endsWith(`/views/${view}/index.vue`))
+  if (altIndex) {
+    return viewModules[altIndex]
+  }
 
   console.error(`[loadView] 未找到视图: ${view}`)
   return null

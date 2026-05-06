@@ -1,5 +1,5 @@
 server:
-  port: 8000
+  port: 18000
   http2:
     # 启用 HTTP/2 支持，提升传输效率
     enabled: true

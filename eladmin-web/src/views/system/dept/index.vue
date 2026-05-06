@@ -4,9 +4,9 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.name" clearable size="small" placeholder="输入部门名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+        <el-input v-model="query.name" clearable placeholder="输入部门名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
-        <el-select v-model="query.enabled" clearable size="small" placeholder="状态" class="filter-item" style="width: 90px" @change="crud.toQuery">
+        <el-select v-model="query.enabled" clearable placeholder="状态" class="filter-item" style="width: 90px" @change="crud.toQuery">
           <el-option v-for="item in enabledTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
         </el-select>
         <rrOperation />
@@ -14,10 +14,10 @@
       <crudOperation :permission="permission" />
     </div>
     <!--表单组件-->
-    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
-      <el-form ref="form" inline :model="form" :rules="rules" size="small" label-width="80px">
+    <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="部门名称" prop="name">
-          <el-input v-model="form.name" style="width: 370px;" />
+          <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="部门排序" prop="deptSort">
           <el-input-number
@@ -25,28 +25,28 @@
             :min="0"
             :max="999"
             controls-position="right"
-            style="width: 370px;"
+            style="width: 100%;"
           />
         </el-form-item>
         <el-form-item label="顶级部门">
-          <el-radio-group v-model="form.isTop" style="width: 140px">
-            <el-radio label="1">是</el-radio>
-            <el-radio label="0">否</el-radio>
+          <el-radio-group v-model="form.isTop">
+            <el-radio value="1">是</el-radio>
+            <el-radio value="0">否</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="状态" prop="enabled">
           <el-radio-group v-model="form.enabled">
-            <el-radio v-for="item in dict.dept_status" :key="item.id" :label="item.value">{{ item.label }}</el-radio>
+            <el-radio v-for="item in dict.dept_status" :key="item.id" :value="item.value">{{ item.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="form.isTop === '0'" style="margin-bottom: 0;" label="上级部门" prop="pid">
+        <el-form-item v-if="form.isTop === '0'" label="上级部门" prop="pid">
           <el-tree-select
             v-model="form.pid"
             :data="depts"
             :props="treeSelectProps"
             check-strictly
             :render-after-expand="false"
-            style="width: 370px;"
+            style="width: 100%;"
             placeholder="选择上级类目"
           />
         </el-form-item>

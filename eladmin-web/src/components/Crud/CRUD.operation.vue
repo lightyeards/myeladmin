@@ -7,8 +7,7 @@
         v-if="crud.optShow.add"
         v-permission="permission.add"
         class="filter-item"
-        size="small"
-        type="primary"
+               type="primary"
         :icon="Plus"
         @click="crud.toAdd"
       >
@@ -18,8 +17,7 @@
         v-if="crud.optShow.edit"
         v-permission="permission.edit"
         class="filter-item"
-        size="small"
-        type="success"
+               type="success"
         :icon="Edit"
         :disabled="crud.selections.length !== 1"
         @click="crud.toEdit(crud.selections[0])"
@@ -32,8 +30,7 @@
         class="filter-item"
         type="danger"
         :icon="Delete"
-        size="small"
-        :loading="crud.delAllLoading"
+               :loading="crud.delAllLoading"
         :disabled="crud.selections.length === 0"
         @click="toDelete(crud.selections)"
       >
@@ -44,8 +41,7 @@
         :loading="crud.downloadLoading"
         :disabled="!crud.data.length"
         class="filter-item"
-        size="small"
-        type="warning"
+               type="warning"
         :icon="Download"
         @click="crud.doExport"
       >导出</el-button>
@@ -54,21 +50,20 @@
     </span>
     <el-button-group class="crud-opts-right">
       <el-button
-        size="small"
-        plain
+               plain
         type="info"
         :icon="Search"
         @click="toggleSearch()"
       />
       <el-button
-        size="small"
-        :icon="Refresh"
+               :icon="Refresh"
         @click="crud.refresh()"
       />
     </el-button-group>
   </div>
 </template>
 <script>
+import { markRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Download, Search, Refresh } from '@element-plus/icons-vue'
 import { crud } from '@crud/crud'
@@ -91,12 +86,12 @@ export default {
   },
   data() {
     return {
-      Plus,
-      Edit,
-      Delete,
-      Download,
-      Search,
-      Refresh
+      Plus: markRaw(Plus),
+      Edit: markRaw(Edit),
+      Delete: markRaw(Delete),
+      Download: markRaw(Download),
+      Search: markRaw(Search),
+      Refresh: markRaw(Refresh)
     }
   },
   created() {

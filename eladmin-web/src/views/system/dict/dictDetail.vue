@@ -8,13 +8,13 @@
       <div class="head-container">
         <div v-if="crud.props.searchToggle">
           <!-- 搜索 -->
-          <el-input v-model="query.label" clearable size="small" placeholder="输入字典标签查询" style="width: 200px;" class="filter-item" @keyup.enter="toQuery" />
+          <el-input v-model="query.label" clearable placeholder="输入字典标签查询" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
           <rrOperation />
         </div>
       </div>
       <!--表单组件-->
-      <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="500px">
-        <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
+      <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
+        <el-form ref="form" :model="form" :rules="rules" label-width="80px">
           <el-form-item label="字典标签" prop="label">
             <el-input v-model="form.label" style="width: 370px;" />
           </el-form-item>

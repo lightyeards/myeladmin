@@ -37,7 +37,7 @@
         <el-card class="box-card">
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="用户资料" name="first">
-              <el-form ref="form" :model="form" :rules="rules" style="margin-top: 10px;" size="small" label-width="65px">
+              <el-form ref="form" :model="form" :rules="rules" style="margin-top: 10px;" label-width="65px">
                 <el-form-item label="昵称" prop="nickName">
                   <el-input v-model="form.nickName" style="width: 35%" />
                   <span style="color: #C0C0C0;margin-left: 10px;">用户昵称不作为登录使用</span>
@@ -48,12 +48,12 @@
                 </el-form-item>
                 <el-form-item label="性别">
                   <el-radio-group v-model="form.gender" style="width: 178px">
-                    <el-radio label="男">男</el-radio>
-                    <el-radio label="女">女</el-radio>
+                    <el-radio value="男">男</el-radio>
+                    <el-radio value="女">女</el-radio>
                   </el-radio-group>
                 </el-form-item>
                 <el-form-item label="">
-                  <el-button :loading="saveLoading" size="small" type="primary" @click="doSubmit">保存配置</el-button>
+                  <el-button :loading="saveLoading" type="primary" @click="doSubmit">保存配置</el-button>
                 </el-form-item>
               </el-form>
             </el-tab-pane>

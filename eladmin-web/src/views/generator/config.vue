@@ -9,16 +9,14 @@
               <el-button
                 :loading="genLoading"
                 :icon="Promotion"
-                size="small"
-                style="float: right; padding: 6px 9px;"
+                               style="float: right; padding: 6px 9px;"
                 type="success"
                 @click="toGen"
               >保存&生成</el-button>
               <el-button
                 :loading="columnLoading"
                 :icon="Check"
-                size="small"
-                style="float: right; padding: 6px 9px;margin-right: 9px"
+                               style="float: right; padding: 6px 9px;margin-right: 9px"
                 type="primary"
                 @click="saveColumnConfig"
               >保存</el-button>
@@ -26,21 +24,20 @@
                 <el-button
                   :loading="syncLoading"
                   :icon="Refresh"
-                  size="small"
-                  style="float: right; padding: 6px 9px;"
+                                   style="float: right; padding: 6px 9px;"
                   type="info"
                   @click="sync"
                 >同步</el-button>
               </el-tooltip>
             </div>
           </template>
-          <el-form size="small" label-width="90px">
-            <el-table v-loading="loading" :data="data" :max-height="tableHeight" size="small" style="width: 100%;margin-bottom: 15px">
+          <el-form label-width="90px">
+            <el-table v-loading="loading" :data="data" :max-height="tableHeight" style="width: 100%;margin-bottom: 15px">
               <el-table-column prop="columnName" width="110px" label="字段名称" />
               <el-table-column prop="columnType" width="110px" label="字段类型" />
               <el-table-column prop="remark" label="字段描述">
                 <template #default="scope">
-                  <el-input v-model="data[scope.$index].remark" size="small" class="edit-input" />
+                  <el-input v-model="data[scope.$index].remark" class="edit-input" />
                 </template>
               </el-table-column>
               <el-table-column align="center" label="必填" width="80px">
@@ -60,7 +57,7 @@
               </el-table-column>
               <el-table-column label="表单类型">
                 <template #default="scope">
-                  <el-select v-model="data[scope.$index].formType" filterable class="edit-input" clearable size="small" placeholder="请选择">
+                  <el-select v-model="data[scope.$index].formType" filterable class="edit-input" clearable placeholder="请选择">
                     <el-option
                       label="文本框"
                       value="Input"
@@ -86,7 +83,7 @@
               </el-table-column>
               <el-table-column label="查询方式">
                 <template #default="scope">
-                  <el-select v-model="data[scope.$index].queryType" filterable class="edit-input" clearable size="small" placeholder="请选择">
+                  <el-select v-model="data[scope.$index].queryType" filterable class="edit-input" clearable placeholder="请选择">
                     <el-option
                       label="="
                       value="="
@@ -120,7 +117,7 @@
               </el-table-column>
               <el-table-column label="关联字典">
                 <template #default="scope">
-                  <el-select v-model="data[scope.$index].dictName" filterable class="edit-input" clearable size="small" placeholder="请选择">
+                  <el-select v-model="data[scope.$index].dictName" filterable class="edit-input" clearable placeholder="请选择">
                     <el-option v-for="item in dicts" :key="item.id" :label="item.remark === '' ? item.name : item.remark" :value="item.name" />
                   </el-select>
                 </template>
@@ -137,14 +134,13 @@
               <el-button
                 :loading="configLoading"
                 :icon="Check"
-                size="small"
-                style="float: right; padding: 6px 9px"
+                               style="float: right; padding: 6px 9px"
                 type="primary"
                 @click="doSubmit"
               >保存</el-button>
             </div>
           </template>
-          <el-form ref="form" :model="form" :rules="rules" size="small" label-width="78px">
+          <el-form ref="form" :model="form" :rules="rules" label-width="78px">
             <el-form-item label="作者名称" prop="author">
               <el-input v-model="form.author" style="width: 40%" />
               <span style="color: #C0C0C0;margin-left: 10px;">类上面的作者名称</span>
@@ -174,9 +170,9 @@
               <span style="color: #C0C0C0;margin-left: 10px;">默认不去除表前缀，可自定义</span>
             </el-form-item>
             <el-form-item label="是否覆盖" prop="cover">
-              <el-radio-group v-model="form.cover" size="small" style="width: 40%">
-                <el-radio-button label="true">是</el-radio-button>
-                <el-radio-button label="false">否</el-radio-button>
+              <el-radio-group v-model="form.cover" style="width: 40%">
+                <el-radio-button value="true">是</el-radio-button>
+                <el-radio-button value="false">否</el-radio-button>
               </el-radio-group>
               <span style="color: #C0C0C0;margin-left: 10px;">谨防误操作，请慎重选择</span>
             </el-form-item>
@@ -188,6 +184,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Promotion, Check, Refresh } from '@element-plus/icons-vue'
 import crud from '@/mixins/crud'
 import { update, get } from '@/api/generator/genConfig'
@@ -199,6 +196,7 @@ export default {
   mixins: [crud],
   data() {
     return {
+      Promotion: markRaw(Promotion), Check: markRaw(Check), Refresh: markRaw(Refresh),
       activeName: 'first', tableName: '', tableHeight: 550, columnLoading: false, configLoading: false, dicts: [], syncLoading: false, genLoading: false,
       form: { id: null, tableName: '', author: '', pack: '', path: '', moduleName: '', cover: 'false', apiPath: '', prefix: '', apiAlias: null },
       rules: {
@@ -304,7 +302,13 @@ export default {
 <style rel="stylesheet/scss" lang="scss">
   .edit-input {
     .el-input__inner {
-      border: 1px solid #e5e6e7;
+      border-color: #dcdfe6;
+      &:hover {
+        border-color: var(--el-input-hover-border-color);
+      }
+      &:focus {
+        border-color: var(--el-input-focus-border-color);
+      }
     }
   }
 </style>

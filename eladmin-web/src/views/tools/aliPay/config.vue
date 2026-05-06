@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" size="small" label-width="100px">
+  <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" label-width="100px">
     <el-form-item label="appID" prop="appId">
       <el-input v-model="form.appId" style="width: 40%" />
       <span style="color: #C0C0C0;margin-left: 10px;">应用APPID,收款账号既是APPID对应支付宝账号</span>

@@ -3,8 +3,7 @@
     <el-input
       v-model="query.blurry"
       clearable
-      size="small"
-      placeholder="请输入你要搜索的内容"
+           placeholder="请输入你要搜索的内容"
       style="width: 200px;"
       class="filter-item"
     />

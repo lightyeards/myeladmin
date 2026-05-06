@@ -31,7 +31,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus, {
-  size: Cookies.get('size') || 'small',
+  size: Cookies.get('size') || 'default',
   locale: zhCn
 })
 

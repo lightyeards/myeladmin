@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
-        <el-input v-model="query.username" clearable size="small" placeholder="输入用户名称查询" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
+        <el-input v-model="query.username" clearable placeholder="输入用户名称查询" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <rrOperation />
       </div>
       <crudOperation>
@@ -11,8 +11,7 @@
             class="filter-item"
             type="danger"
             :icon="Delete"
-            size="small"
-            :loading="delLoading"
+                       :loading="delLoading"
             :disabled="crud.selections.length === 0"
             @click="doDelete(crud.selections)"
           >
@@ -33,23 +32,25 @@
       <el-table-column :show-overflow-tooltip="true" prop="address" label="登录地点" />
       <el-table-column prop="browser" label="浏览器" />
       <el-table-column prop="loginTime" label="登录时间" />
-      <el-table-column label="操作" width="70px" fixed="right">
+      <el-table-column label="操作" width="70px" align="center" fixed="right">
         <template #default="scope">
-          <el-popover
-            :ref="scope.$index"
-            v-permission="['admin']"
-            placement="top"
-            width="180"
-          >
-            <p>确定强制退出该用户吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="small" text @click="$refs[scope.$index].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
-            </div>
-            <template #reference>
-              <el-button size="small" text>强退</el-button>
-            </template>
-          </el-popover>
+          <span v-permission="['admin']">
+            <el-popover
+              :ref="scope.$index"
+              placement="top"
+              width="180"
+              trigger="click"
+            >
+              <p>确定强制退出该用户吗？</p>
+              <div style="text-align: right; margin: 0">
+                <el-button text size="small" @click="$refs[scope.$index].doClose()">取消</el-button>
+                <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.key, scope.$index)">确定</el-button>
+              </div>
+              <template #reference>
+                <el-button link type="danger" size="small">强退</el-button>
+              </template>
+            </el-popover>
+          </span>
         </template>
       </el-table-column>
     </el-table>
@@ -59,6 +60,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import { del } from '@/api/monitor/online'
@@ -76,7 +78,7 @@ export default {
   mixins: [presenter(), header(), crud()],
   data() {
     return {
-      Delete,
+      Delete: markRaw(Delete),
       delLoading: false,
       permission: {}
     }

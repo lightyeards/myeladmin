@@ -8,8 +8,7 @@
             class="filter-item"
             type="danger"
             :icon="Delete"
-            size="small"
-            :loading="crud.delAllLoading"
+                       :loading="crud.delAllLoading"
             @click="confirmDelAll()"
           >
             清空
@@ -51,6 +50,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import Search from './search.vue'
@@ -68,7 +68,7 @@ export default {
   mixins: [presenter()],
   data() {
     return {
-      Delete
+      Delete: markRaw(Delete)
     }
   },
   created() {

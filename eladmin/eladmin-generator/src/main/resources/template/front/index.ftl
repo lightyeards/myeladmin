@@ -10,7 +10,7 @@
           <#list queryColumns as column>
             <#if column.queryType != 'BetWeen'>
         <label class="el-form-item-label"><#if column.remark != ''>${column.remark}<#else>${column.changeColumnName}</#if></label>
-        <el-input v-model="query.${column.changeColumnName}" clearable placeholder="<#if column.remark != ''>${column.remark}<#else>${column.changeColumnName}</#if>" style="width: 185px;" class="filter-item" @keyup.enter.native="crud.toQuery" />
+        <el-input v-model="query.${column.changeColumnName}" clearable placeholder="<#if column.remark != ''>${column.remark}<#else>${column.changeColumnName}</#if>" style="width: 185px;" class="filter-item" @keyup.enter="crud.toQuery" />
             </#if>
           </#list>
         </#if>
@@ -26,14 +26,14 @@
       </#if>
     </#list>
   </#if>
-        <rrOperation :crud="crud" />
+        <rrOperation />
       </div>
     </#if>
       <!--如果想在工具栏加入更多按钮，可以使用插槽方式， slot = 'left' or 'right'-->
       <crudOperation :permission="permission" />
       <!--表单组件-->
-      <el-dialog :close-on-click-modal="false" :before-close="crud.cancelCU" :visible.sync="crud.status.cu > 0" :title="crud.status.title" width="500px">
-        <el-form ref="form" :model="form" <#if isNotNullColumns??>:rules="rules"</#if> size="small" label-width="80px">
+      <el-dialog v-model="cuVisible" append-to-body :close-on-click-modal="false" :before-close="crud.cancelCU" :title="crud.status.title" width="520px">
+        <el-form ref="form" :model="form" <#if isNotNullColumns??>:rules="rules"</#if> label-width="80px">
     <#if columns??>
       <#list columns as column>
         <#if column.formShow>
@@ -68,20 +68,22 @@
       </#list>
     </#if>
         </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button type="text" @click="crud.cancelCU">取消</el-button>
-          <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
-        </div>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button text @click="crud.cancelCU">取消</el-button>
+            <el-button :loading="crud.status.cu === 2" type="primary" @click="crud.submitCU">确认</el-button>
+          </div>
+        </template>
       </el-dialog>
       <!--表格渲染-->
-      <el-table ref="table" v-loading="crud.loading" :data="crud.data" size="small" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
+      <el-table ref="table" v-loading="crud.loading" :data="crud.data" style="width: 100%;" @selection-change="crud.selectionChangeHandler">
         <el-table-column type="selection" width="55" />
         <#if columns??>
             <#list columns as column>
             <#if column.columnShow>
           <#if (column.dictName)?? && (column.dictName)!="">
         <el-table-column prop="${column.changeColumnName}" label="<#if column.remark != ''>${column.remark}<#else>${column.changeColumnName}</#if>">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{ dict.label.${column.dictName}[scope.row.${column.changeColumnName}] }}
           </template>
         </el-table-column>
@@ -92,7 +94,7 @@
             </#list>
         </#if>
         <el-table-column v-if="checkPer(['admin','${changeClassName}:edit','${changeClassName}:del'])" label="操作" width="150px" align="center">
-          <template slot-scope="scope">
+          <template #default="scope">
             <udOperation
               :data="scope.row"
               :permission="permission"
@@ -109,10 +111,10 @@
 <script>
 import crud${className} from '@/api/${changeClassName}'
 import CRUD, { presenter, header, form, crud } from '@crud/crud'
-import rrOperation from '@crud/RR.operation'
-import crudOperation from '@crud/CRUD.operation'
-import udOperation from '@crud/UD.operation'
-import pagination from '@crud/Pagination'
+import rrOperation from '@crud/RR.operation.vue'
+import crudOperation from '@crud/CRUD.operation.vue'
+import udOperation from '@crud/UD.operation.vue'
+import pagination from '@crud/Pagination.vue'
 
 const defaultForm = { <#if columns??><#list columns as column>${column.changeColumnName}: null<#if column_has_next>, </#if></#list></#if> }
 export default {
@@ -153,6 +155,12 @@ export default {
         </#if>
       ]
       </#if>
+    }
+  },
+  computed: {
+    cuVisible: {
+      get() { return this.crud.status.cu > 0 },
+      set(v) { if (!v) this.crud.cancelCU() }
     }
   },
   methods: {

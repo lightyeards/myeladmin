@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" size="small" label-width="100px">
+    <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" label-width="100px">
       <el-form-item label="邮件标题" prop="subject">
         <el-input v-model="form.subject" style="width: 646px" placeholder="请输入邮件标题，标题不能为空" />
       </el-form-item>

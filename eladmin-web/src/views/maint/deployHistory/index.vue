@@ -17,23 +17,25 @@
       <el-table-column prop="ip" label="部署IP" />
       <el-table-column prop="deployUser" label="部署人员" />
       <el-table-column prop="deployDate" label="部署时间" />
-      <el-table-column v-if="checkPer(['admin','deployHistory:del'])" label="操作" width="100px" align="center">
+      <el-table-column v-if="checkPer(['admin','deployHistory:del'])" label="操作" width="130px" align="center">
         <template #default="scope">
-          <el-popover
-            :ref="scope.row.id"
-            v-permission="['admin','deployHistory:del']"
-            placement="top"
-            width="180"
-          >
-            <p>确定删除本条数据吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="small" text @click="$refs[scope.row.id].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.id)">确定</el-button>
-            </div>
-            <template #reference>
-              <el-button type="danger" :icon="Delete" size="small" />
-            </template>
-          </el-popover>
+          <span v-permission="['admin','deployHistory:del']">
+            <el-popover
+              :ref="scope.row.id"
+              placement="top"
+              width="180"
+              trigger="click"
+            >
+              <template #reference>
+                <el-button link type="danger" size="small" :icon="Delete">删除</el-button>
+              </template>
+              <p>确定删除本条数据吗？</p>
+              <div style="text-align: right; margin: 0">
+                <el-button text size="small" @click="$refs[scope.row.id].doClose()">取消</el-button>
+                <el-button :loading="delLoading" type="primary" size="small" @click="delMethod(scope.row.id)">确定</el-button>
+              </div>
+            </el-popover>
+          </span>
         </template>
       </el-table-column>
     </el-table>
@@ -43,6 +45,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { del } from '@/api/maint/deployHistory'
 import CRUD, { presenter, header } from '@crud/crud'
@@ -60,6 +63,7 @@ export default {
   mixins: [presenter(), header()],
   data() {
     return {
+      Delete: markRaw(Delete),
       delLoading: false,
       permission: {
         del: ['admin', 'deployHistory:del']

@@ -1,145 +1,116 @@
 <template>
   <div v-loading="!show" element-loading-text="数据加载中..." :style="!show ? 'height: 500px' : 'height: 100%'" class="app-container">
     <div v-if="show">
-      <el-card class="box-card">
-        <div style="color: #666;font-size: 13px;">
-          <svg-icon icon-class="system" style="margin-right: 5px" />
-          <span>
-            系统：{{ data.sys.os }}
-          </span>
-          <span>
-            IP：{{ data.sys.ip }}
-          </span>
-          <span>
-            项目已不间断运行：{{ data.sys.day }}
-          </span>
-          <el-icon class="refresh-icon" style="margin-left: 40px" @click="init"><refresh /></el-icon>
-        </div>
-      </el-card>
-      <el-card class="box-card">
-        <template #header>
-          <div class="clearfix">
-            <span style="font-weight: bold;color: #666;font-size: 15px">状态</span>
-          </div>
-        </template>
-        <div>
-          <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
-            <div class="title">CPU使用率</div>
-            <el-tooltip placement="top-end">
-              <template #content><div style="font-size: 12px;">
-                <div style="padding: 3px;">
-                  {{ data.cpu.name }}
-                </div>
-                <div style="padding: 3px">
-                  {{ data.cpu.package }}
-                </div>
-                <div style="padding: 3px">
-                  {{ data.cpu.core }}
-                </div>
-                <div style="padding: 3px">
-                  {{ data.cpu.logic }}
-                </div>
-              </div>
-              </template>
-              <div class="content">
-                <el-progress type="dashboard" :percentage="parseFloat(data.cpu.used)" />
-              </div>
-            </el-tooltip>
-            <div class="footer">{{ data.cpu.coreNumber }} 核心</div>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
-            <div class="title">内存使用率</div>
-            <el-tooltip placement="top-end">
-              <template #content><div style="font-size: 12px;">
-                <div style="padding: 3px;">
-                  总量：{{ data.memory.total }}
-                </div>
-                <div style="padding: 3px">
-                  已使用：{{ data.memory.used }}
-                </div>
-                <div style="padding: 3px">
-                  空闲：{{ data.memory.available }}
-                </div>
-              </div>
-              </template>
-              <div class="content">
-                <el-progress type="dashboard" :percentage="parseFloat(data.memory.usageRate)" />
-              </div>
-            </el-tooltip>
-            <div class="footer">{{ data.memory.used }} / {{ data.memory.total }}</div>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
-            <div class="title">交换区使用率</div>
-            <el-tooltip placement="top-end">
-              <template #content><div style="font-size: 12px;">
-                <div style="padding: 3px;">
-                  总量：{{ data.swap.total }}
-                </div>
-                <div style="padding: 3px">
-                  已使用：{{ data.swap.used }}
-                </div>
-                <div style="padding: 3px">
-                  空闲：{{ data.swap.available }}
-                </div>
-              </div>
-              </template>
-              <div class="content">
-                <el-progress type="dashboard" :percentage="parseFloat(data.swap.usageRate)" />
-              </div>
-            </el-tooltip>
-            <div class="footer">{{ data.swap.used }} / {{ data.swap.total }}</div>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="6" :lg="6" :xl="6" style="margin-bottom: 10px">
-            <div class="title">磁盘使用率</div>
-            <div class="content">
-              <el-tooltip placement="top-end">
-                <template #content><div style="font-size: 12px;">
-                  <div style="padding: 3px">
-                    总量：{{ data.disk.total }}
-                  </div>
-                  <div style="padding: 3px">
-                    空闲：{{ data.disk.available }}
-                  </div>
-                </div>
-                </template>
-                <div class="content">
-                  <el-progress type="dashboard" :percentage="parseFloat(data.disk.usageRate)" />
-                </div>
-              </el-tooltip>
-            </div>
-            <div class="footer">{{ data.disk.used }} / {{ data.disk.total }}</div>
-          </el-col>
+      <el-card class="box-card" shadow="never">
+        <div class="system-info">
+          <svg-icon icon-class="system" />
+          <span>系统：{{ data.sys.os }}</span>
+          <span>IP：{{ data.sys.ip }}</span>
+          <span>项目已不间断运行：{{ data.sys.day }}</span>
+          <el-icon class="refresh-icon" @click="init"><refresh /></el-icon>
         </div>
       </el-card>
 
-      <div>
-        <el-row :gutter="6">
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" style="margin-bottom: 10px">
-            <el-card class="box-card">
-              <template #header>
-                <div class="clearfix">
-                  <span style="font-weight: bold;color: #666;font-size: 15px">CPU使用率监控</span>
+      <el-row :gutter="10">
+        <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-card class="gauge-card" shadow="never">
+            <div class="gauge-title">CPU使用率</div>
+            <el-tooltip placement="top">
+              <template #content>
+                <div style="font-size: 12px; line-height: 1.8;">
+                  <div>{{ data.cpu.name }}</div>
+                  <div>{{ data.cpu.package }}</div>
+                  <div>{{ data.cpu.core }}</div>
+                  <div>{{ data.cpu.logic }}</div>
                 </div>
               </template>
-              <div>
-                <v-chart :option="cpuInfo" />
+              <div class="gauge-content">
+                <el-progress type="dashboard" :percentage="parseFloat(data.cpu.used)" />
               </div>
-            </el-card>
-          </el-col>
-          <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12" style="margin-bottom: 10px">
-            <el-card class="box-card">
-              <template #header>
-                <div class="clearfix">
-                  <span style="font-weight: bold;color: #666;font-size: 15px">内存使用率监控</span>
+            </el-tooltip>
+            <div class="gauge-footer">{{ data.cpu.coreNumber }} 核心</div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-card class="gauge-card" shadow="never">
+            <div class="gauge-title">内存使用率</div>
+            <el-tooltip placement="top">
+              <template #content>
+                <div style="font-size: 12px; line-height: 1.8;">
+                  <div>总量：{{ data.memory.total }}</div>
+                  <div>已使用：{{ data.memory.used }}</div>
+                  <div>空闲：{{ data.memory.available }}</div>
                 </div>
               </template>
-              <div>
-                <v-chart :option="memoryInfo" />
+              <div class="gauge-content">
+                <el-progress type="dashboard" :percentage="parseFloat(data.memory.usageRate)" />
               </div>
-            </el-card>
-          </el-col>
-        </el-row>
-      </div>
+            </el-tooltip>
+            <div class="gauge-footer">{{ data.memory.used }} / {{ data.memory.total }}</div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-card class="gauge-card" shadow="never">
+            <div class="gauge-title">交换区使用率</div>
+            <el-tooltip placement="top">
+              <template #content>
+                <div style="font-size: 12px; line-height: 1.8;">
+                  <div>总量：{{ data.swap.total }}</div>
+                  <div>已使用：{{ data.swap.used }}</div>
+                  <div>空闲：{{ data.swap.available }}</div>
+                </div>
+              </template>
+              <div class="gauge-content">
+                <el-progress type="dashboard" :percentage="parseFloat(data.swap.usageRate)" />
+              </div>
+            </el-tooltip>
+            <div class="gauge-footer">{{ data.swap.used }} / {{ data.swap.total }}</div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="12" :md="6" :lg="6" :xl="6">
+          <el-card class="gauge-card" shadow="never">
+            <div class="gauge-title">磁盘使用率</div>
+            <el-tooltip placement="top">
+              <template #content>
+                <div style="font-size: 12px; line-height: 1.8;">
+                  <div>总量：{{ data.disk.total }}</div>
+                  <div>空闲：{{ data.disk.available }}</div>
+                </div>
+              </template>
+              <div class="gauge-content">
+                <el-progress type="dashboard" :percentage="parseFloat(data.disk.usageRate)" />
+              </div>
+            </el-tooltip>
+            <div class="gauge-footer">{{ data.disk.used }} / {{ data.disk.total }}</div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="10">
+        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+          <el-card class="chart-card" shadow="never">
+            <template #header>
+              <span class="chart-header">CPU使用率监控</span>
+            </template>
+            <div style="height: 300px;">
+              <v-chart :option="cpuInfo" autoresize />
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
+          <el-card class="chart-card" shadow="never">
+            <template #header>
+              <span class="chart-header">内存使用率监控</span>
+            </template>
+            <div style="height: 300px;">
+              <v-chart :option="memoryInfo" autoresize />
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
@@ -177,12 +148,12 @@ export default {
           data: [],
           type: 'line',
           areaStyle: {
-            color: 'rgb(32, 160, 255)' // 改变区域颜色
+            color: 'rgb(32, 160, 255)'
           },
           itemStyle: {
             color: '#6fbae1',
             lineStyle: {
-              color: '#6fbae1' // 改变折线颜色
+              color: '#6fbae1'
             }
           }
         }]
@@ -206,12 +177,12 @@ export default {
           data: [],
           type: 'line',
           areaStyle: {
-            color: 'rgb(32, 160, 255)' // 改变区域颜色
+            color: 'rgb(32, 160, 255)'
           },
           itemStyle: {
             color: '#6fbae1',
             lineStyle: {
-              color: '#6fbae1' // 改变折线颜色
+              color: '#6fbae1'
             }
           }
         }]
@@ -251,41 +222,72 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
- :deep(.box-card) {
-    margin-bottom: 5px;
-    span {
-      margin-right: 28px;
-    }
-    .refresh-icon {
-      margin-right: 10px;
-      float: right;
-      cursor:pointer;
-    }
-  }
-  .cpu, .memory, .swap, .disk  {
-    width: 20%;
-    float: left;
-    padding-bottom: 20px;
-    margin-right: 5%;
-  }
- .title {
-   text-align: center;
-   font-size: 15px;
-   font-weight: 500;
-   color: #999;
-   margin-bottom: 16px;
- }
- .footer {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 500;
+.system-info {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  color: #666;
+  font-size: 13px;
+
+  .refresh-icon {
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 16px;
     color: #999;
-    margin-top: -5px;
-    margin-bottom: 10px;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #409EFF;
+    }
   }
-  .content {
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 5px;
+}
+
+.gauge-card {
+  margin-bottom: 10px;
+
+  :deep(.el-card__body) {
+    padding: 16px 12px 12px;
   }
+}
+
+.gauge-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  margin-bottom: 8px;
+}
+
+.gauge-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 140px;
+}
+
+.gauge-footer {
+  text-align: center;
+  font-size: 13px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.chart-card {
+  margin-bottom: 10px;
+
+  :deep(.el-card__header) {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebeef5;
+  }
+
+  :deep(.el-card__body) {
+    padding: 12px;
+  }
+}
+
+.chart-header {
+  font-weight: 600;
+  color: #303133;
+  font-size: 14px;
+}
 </style>

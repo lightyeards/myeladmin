@@ -1,16 +1,16 @@
 <template>
-  <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="系统还原" width="800px">
+  <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="系统还原" width="720px">
     <!--工具栏-->
     <div class="head-container">
       <date-range-picker v-model="query.createTime" class="date-item" />
-      <el-button class="filter-item" size="small" type="success" :icon="Search" @click="toQuery">搜索</el-button>
+      <el-button class="filter-item" type="success" :icon="Search" @click="toQuery">搜索</el-button>
     </div>
-    <el-form size="small" label-width="80px">
+    <el-form label-width="80px">
       <!--表格渲染-->
       <el-table v-loading="loading" :data="data" style="width: 100%" @row-click="showRow">
         <el-table-column width="30px">
           <template #default="scope">
-            <el-radio v-model="radio" :label="scope.$index" />
+            <el-radio v-model="radio" :value="scope.$index" />
           </template>
         </el-table-column>
         <el-table-column prop="appName" label="应用名称" />
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import crud from '@/mixins/crud'
@@ -54,6 +55,7 @@ export default {
   },
   data() {
     return {
+      Search: markRaw(Search),
       submitLoading: false,
       dialog: false,
       history: [],

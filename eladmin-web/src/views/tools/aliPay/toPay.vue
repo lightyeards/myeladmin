@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" size="small" label-width="90px">
+    <el-form ref="form" :model="form" :rules="rules" style="margin-top: 6px;" label-width="90px">
       <el-form-item label="商品名称" prop="subject">
         <el-input v-model="form.subject" style="width: 35%" />
       </el-form-item>

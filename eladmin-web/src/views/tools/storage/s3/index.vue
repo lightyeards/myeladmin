@@ -6,18 +6,18 @@
     <div class="head-container">
       <div v-if="crud.props.searchToggle">
         <!-- 搜索 -->
-        <el-input v-model="query.key" clearable size="small" placeholder="输入文件名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="toQuery" />
+        <el-input v-model="query.key" clearable placeholder="输入文件名称搜索" style="width: 200px;" class="filter-item" @keyup.enter="crud.toQuery" />
         <date-range-picker v-model="query.createTime" class="date-item" />
         <rrOperation />
       </div>
       <crudOperation :permission="permission">
         <template #left>
           <!-- 上传 -->
-          <el-button class="filter-item" size="small" type="primary" :icon="Upload" @click="dialog = true">上传</el-button>
+          <el-button class="filter-item" type="primary" :icon="Upload" @click="dialog = true">上传</el-button>
         </template>
       </crudOperation>
       <!-- 文件上传 -->
-      <el-dialog v-model="dialog" :close-on-click-modal="false" append-to-body width="500px" @close="doSubmit">
+      <el-dialog v-model="dialog" :close-on-click-modal="false" append-to-body width="520px" @close="doSubmit">
         <el-upload
           :before-remove="handleBeforeRemove"
           :on-success="handleSuccess"
@@ -28,7 +28,7 @@
           class="upload-demo"
           multiple
         >
-          <el-button size="small" type="primary">点击上传</el-button>
+          <el-button type="primary">点击上传</el-button>
           <template #tip><div style="display: block;" class="el-upload__tip">请勿上传违法文件，且文件不超过15M</div></template>
         </el-upload>
         <template #footer>
@@ -59,6 +59,7 @@
 <script>
 import s3Storage from '@/api/tools/s3Storage'
 import { mapState } from 'pinia'
+import { markRaw } from 'vue'
 import { Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useApiStore } from '@/store'
@@ -77,6 +78,7 @@ export default {
   mixins: [presenter(), header(), crud()],
   data() {
     return {
+      Upload: markRaw(Upload),
       permission: {
         del: ['admin', 'storage:del']
       },

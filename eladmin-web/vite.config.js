@@ -8,7 +8,7 @@ const resolve = (p) => path.resolve(__dirname, p)
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '')
-  const apiTarget = env.VITE_APP_BASE_API || 'http://localhost:8000'
+  const apiTarget = env.VITE_APP_BASE_API || 'http://localhost:18000'
 
   return {
     base: '/',
@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
       })
     ],
     server: {
-      port: 8013,
+      port: 18013,
       open: true,
       host: '0.0.0.0',
       proxy: {

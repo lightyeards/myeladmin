@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="dialog" append-to-body :close-on-click-modal="false" title="执行脚本" width="400px">
-    <el-form ref="form" :rules="rules" size="small">
+    <el-form ref="form" :rules="rules">
       <el-upload
         :action="databaseUploadApi"
         :data="databaseInfo"
